@@ -15,6 +15,7 @@ import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.interop.SimpleFeatureTypes;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory2;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -124,6 +125,23 @@ public class EventsToGeomesa {
             log.info("fetched " + counter + " features");
         }
 
+        log.info("querying features for time");
+        try (var reader = dataStore.getFeatureReader(createTimeQuery(type), Transaction.AUTO_COMMIT)) {
+
+            var counter = 0;
+            while (reader.hasNext()) {
+                var feature = reader.next();
+                StringBuilder message = new StringBuilder(feature.getID() + ": ");
+                for (Object attribute : feature.getAttributes()) {
+                    message.append(attribute.toString()).append(", ");
+                }
+                log.info("fetched: " + message);
+                counter++;
+            }
+
+            log.info("fetched " + counter + " features");
+        }
+
         // this would go into some finally block I guess
         dataStore.dispose();
 
@@ -131,7 +149,7 @@ public class EventsToGeomesa {
 
     private SimpleFeatureType createType() {
 
-        String builder = "time:Double," +
+        String builder = "time:Double:index=true," +
                 "type:String:index=true," +
                 "*geom:Point:srid=4326";
         return SimpleFeatureTypes.createType("event", builder);
@@ -141,7 +159,7 @@ public class EventsToGeomesa {
     private List<SimpleFeature> createFeatures(SimpleFeatureType type) {
 
         var builder = new SimpleFeatureBuilder(type);
-        builder.set("time", 1.);
+        builder.set("time", 15.);
         builder.set("type", "LinkEnterEvent");
         builder.set("geom", "POINT (" + 10 + " " + 10 + ")");
         var feature = builder.buildFeature(UUID.randomUUID().toString());
@@ -161,5 +179,10 @@ public class EventsToGeomesa {
 
     private Query createEventTypeQuery(SimpleFeatureType type) throws CQLException {
         return new Query(type.getTypeName(), ECQL.toFilter("type = 'LinkLeaveEvent'"));
+    }
+
+    private Query createTimeQuery(SimpleFeatureType type) throws CQLException {
+
+        return new Query(type.getTypeName(), ECQL.toFilter("time BETWEEN 10 AND 20"));
     }
 }
