@@ -1,6 +1,7 @@
 package org.matism.contribs.analysis;
 
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureWriter;
 import org.locationtech.jts.geom.Geometry;
@@ -15,12 +16,16 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
 
+@Log4j2
 public class GeomesaHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
 
     private final FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
     private final Network network;
     private final CoordinateTransformation transformation;
+    private int counter = 0;
 
     GeomesaHandler(FeatureWriter<SimpleFeatureType, SimpleFeature> writer, Network network, CoordinateTransformation transformation) {
         this.writer = writer;
@@ -31,7 +36,6 @@ public class GeomesaHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     @Override
     public void handleEvent(LinkEnterEvent linkEnterEvent) {
 
-
         var link = network.getLinks().get(linkEnterEvent.getLinkId());
         var coord = transformation.transform(link.getFromNode().getCoord());
 
@@ -40,12 +44,10 @@ public class GeomesaHandler implements LinkEnterEventHandler, LinkLeaveEventHand
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     public void handleEvent(LinkLeaveEvent linkLeaveEvent) {
-
 
         var link = network.getLinks().get(linkLeaveEvent.getLinkId());
         var coord = transformation.transform(link.getToNode().getCoord());
@@ -58,12 +60,15 @@ public class GeomesaHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     }
 
     private void write(Coord coord, double time, String type) throws IOException {
-
+        counter++;
         var toWrite = writer.next();
-        toWrite.setAttribute("geom", "POINT (" + coord.getX() + " " + coord.getY() + ")");
-        toWrite.setAttribute("time", time);
+        toWrite.setAttribute("geometry", "POINT (" + coord.getX() + " " + coord.getY() + ")");
+        toWrite.setAttribute("time", Date.from(Instant.ofEpochSecond((long)time)));
         toWrite.setAttribute("type", type);
         writer.write();
 
+        if (counter % 10000 == 0) {
+            log.info("wrote: " + counter + " events");
+        }
     }
 }
