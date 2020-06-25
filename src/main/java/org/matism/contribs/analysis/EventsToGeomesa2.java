@@ -9,8 +9,7 @@ import org.geotools.filter.FilterFactoryImpl;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
-import org.locationtech.geomesa.utils.interop.SimpleFeatureTypes;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
@@ -22,7 +21,6 @@ import org.opengis.filter.Filter;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
@@ -55,18 +53,27 @@ public class EventsToGeomesa2 {
 
         Map<String, Serializable> storeParams = Map.of("fs.path", storeRoot, "fs.encoding", "parquet");
         var store = new FileSystemDataStoreFactory().createDataStore(storeParams);
-        var schemaType = createSchema();
+        var schemaType = TrajectoryFeatureType.createFeatureType();
         store.createSchema(schemaType);
 
+        log.info("Read in network");
         var network = NetworkUtils.createNetwork();
         new MatsimNetworkReader(network).readFile(networkFile);
 
-        var handler = new GeomesaHandler(store.getFeatureWriterAppend(schemaType.getTypeName(), Transaction.AUTO_COMMIT), network, transformation);
+        // project network onto EPSG:4326
+        log.info("Transform network");
+        for (Node node : network.getNodes().values()) {
+            var transformedCoord = transformation.transform(node.getCoord());
+            node.setCoord(transformedCoord);
+        }
+
+        var handler = new TrajectoryToGeomesaHandler(store.getFeatureWriterAppend(schemaType.getTypeName(), Transaction.AUTO_COMMIT), network);
         var manager = EventsUtils.createEventsManager();
         manager.addHandler(handler);
         log.info("starting to read events file");
         new MatsimEventsReader(manager).readFile(events);
 
+        log.info("Done reading events");
         store.dispose();
     }
 
@@ -78,7 +85,7 @@ public class EventsToGeomesa2 {
 
         // note: BETWEEN is inclusive, while DURING is exclusive
         Filter dateFilter = factory.between(factory.property("time"), factory.literal(from), factory.literal(to));
-        Query query = new Query(createSchema().getTypeName(), dateFilter);
+        Query query = new Query(TrajectoryFeatureType.createFeatureType().getTypeName(), dateFilter);
 
         Map<String, Serializable> storeParams = Map.of("fs.path", storeRoot, "fs.encoding", "parquet");
         var store = new FileSystemDataStoreFactory().createDataStore(storeParams);
