@@ -6,6 +6,8 @@ import lombok.extern.log4j.Log4j2;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.filter.FilterFactoryImpl;
+import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.filter.text.ecql.ECQL;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
@@ -39,13 +41,13 @@ public class EventsToGeomesa2 {
     private String storeRoot = "";
 
     // this could be somewhat dynamic later on as well
-    private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:25832", "EPSG:4326");
+    private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326");
 
     public static void main(String[] args) throws IOException {
 
         var converter = new EventsToGeomesa2();
         JCommander.newBuilder().addObject(converter).build().parse(args);
-        converter.convert();
+       // converter.convert();
         converter.read();
     }
 
@@ -80,12 +82,14 @@ public class EventsToGeomesa2 {
     private void read() throws IOException {
 
         var factory = new FilterFactoryImpl();
-        Date from = Date.from(Instant.ofEpochSecond(3600 * 8));
+        Date from = Date.from(Instant.ofEpochSecond(0));
         Date to = Date.from(Instant.ofEpochSecond(3600 * 10));
 
         // note: BETWEEN is inclusive, while DURING is exclusive
-        Filter dateFilter = factory.between(factory.property("time"), factory.literal(from), factory.literal(to));
-        Query query = new Query(TrajectoryFeatureType.createFeatureType().getTypeName(), dateFilter);
+
+        Filter dateFilter = factory.between(factory.property(TrajectoryFeatureType.exitTime), factory.literal(from), factory.literal(to));
+        var query = new Query(TrajectoryFeatureType.createFeatureType().getTypeName(), dateFilter);
+        //Query query = new Query(TrajectoryFeatureType.createFeatureType().getTypeName(), Filter.INCLUDE);
 
         Map<String, Serializable> storeParams = Map.of("fs.path", storeRoot, "fs.encoding", "parquet");
         var store = new FileSystemDataStoreFactory().createDataStore(storeParams);
@@ -96,24 +100,12 @@ public class EventsToGeomesa2 {
 
                 StringBuilder message = new StringBuilder(feature.getID() + ": ");
                 for (Object attribute : feature.getAttributes()) {
-                    message.append(attribute.toString()).append(", ");
+
+                    var attrString = attribute == null ? "null" : attribute.toString();
+                    message.append(attrString).append(", ");
                 }
                 log.info(message);
             }
         }
-    }
-
-    private SimpleFeatureType createSchema() {
-
-        var schema = SchemaBuilder.builder()
-                .addDate("time", true).end() // I guess the boolean means 'isIndex'
-                .addPoint("geometry", true).end()
-                .addString("type").withIndex().end()
-                //.addString("vehicleId").withIndex().end()
-                .build("linkEvents");
-
-        // tell the file storage to partition the data into minutes and use 16bit geohashes
-        ConfigurationUtils.setScheme(schema, "minute,z2-16bit", Collections.emptyMap());
-        return schema;
     }
 }

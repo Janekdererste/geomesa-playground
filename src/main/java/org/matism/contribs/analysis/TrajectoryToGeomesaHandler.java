@@ -21,11 +21,12 @@ import java.time.Instant;
 import java.util.*;
 
 @Log4j2
-public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
+public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
     private final Map<Id<Person>, Leg> departed = new HashMap<>();
     private final Map<Id<Vehicle>, Id<Person>> personInVehicle = new HashMap<>();
     private final FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
+    private final Set<Id<Person>> transitDrivers = new HashSet<>();
     private final Network network;
     private int counter = 0;
 
@@ -37,30 +38,38 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
     @Override
     public void handleEvent(PersonDepartureEvent personDepartureEvent) {
 
+        if (transitDrivers.contains(personDepartureEvent.getPersonId())) return;
         // this could probably get a cache
-        var trip = new Leg();
-        trip.times.add(personDepartureEvent.getTime());
-        trip.mode = personDepartureEvent.getLegMode();
+        var leg = new Leg();
+        leg.times.add(personDepartureEvent.getTime());
+        leg.mode = personDepartureEvent.getLegMode();
         var fromCoord = network.getLinks().get(personDepartureEvent.getLinkId()).getToNode().getCoord(); // I think we assume agents start at the end of a link
-        trip.coords.add(fromCoord);
-        trip.linkIds.add(personDepartureEvent.getLinkId().toString());
+        leg.coords.add(fromCoord);
+        leg.linkIds.add(personDepartureEvent.getLinkId().toString());
 
-        departed.put(personDepartureEvent.getPersonId(), trip);
+        departed.put(personDepartureEvent.getPersonId(), leg);
     }
 
     @Override
     public void handleEvent(PersonEntersVehicleEvent personEntersVehicleEvent) {
 
-        // track who is in which vehicle -- this is not fit for scenarios with pt yet
-        personInVehicle.put(personEntersVehicleEvent.getVehicleId(), personEntersVehicleEvent.getPersonId());
+        if (transitDrivers.contains(personEntersVehicleEvent.getPersonId())) return;
 
         // if a person enters a vehicle the leg is not teleported
         var leg = departed.get(personEntersVehicleEvent.getPersonId());
         leg.isTeleported = false;
+        leg.vehicleId = personEntersVehicleEvent.getVehicleId().toString();
+
+        if (!leg.mode.equals("pt"))
+            // track who is in which vehicle -- this is not fit for scenarios with pt yet
+            personInVehicle.put(personEntersVehicleEvent.getVehicleId(), personEntersVehicleEvent.getPersonId());
+
     }
 
     @Override
     public void handleEvent(PersonLeavesVehicleEvent personLeavesVehicleEvent) {
+
+        if (transitDrivers.contains(personLeavesVehicleEvent.getPersonId())) return;
 
         personInVehicle.remove(personLeavesVehicleEvent.getVehicleId());
     }
@@ -68,7 +77,7 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
     @Override
     public void handleEvent(PersonArrivalEvent personArrivalEvent) {
 
-
+        if (transitDrivers.contains(personArrivalEvent.getPersonId())) return;
 
         // a leg always ends here
         var link = network.getLinks().get(personArrivalEvent.getLinkId());
@@ -83,32 +92,26 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
     }
 
     @Override
-    public void handleEvent(LinkEnterEvent linkEnterEvent) {
-
-       /* var link = network.getLinks().get(linkEnterEvent.getLinkId());
-        var person = personInVehicle.get(linkEnterEvent.getVehicleId());
-        var leg = departed.get(person);
-        leg.coords.add(link.getFromNode().getCoord());
-        leg.times.add(linkEnterEvent.getTime());
-
-        */
-    }
-
-    @Override
     public void handleEvent(LinkLeaveEvent linkLeaveEvent) {
 
-        var person = personInVehicle.get(linkLeaveEvent.getVehicleId());
-        var leg = departed.get(person);
+            if (!personInVehicle.containsKey(linkLeaveEvent.getVehicleId())) return;
 
-        // handle if departure event has already put in the first coordinate
-        if (leg.linkIds.size() == 1 && leg.linkIds.get(0).equals(linkLeaveEvent.getLinkId().toString())) {
-            return;
-        }
+            var person = personInVehicle.get(linkLeaveEvent.getVehicleId());
+            var leg = departed.get(person);
 
-        var link = network.getLinks().get(linkLeaveEvent.getLinkId());
-        leg.coords.add(link.getToNode().getCoord());
-        leg.times.add(linkLeaveEvent.getTime());
-        leg.linkIds.add(linkLeaveEvent.getLinkId().toString());
+            try {
+                // handle if departure event has already put in the first coordinate
+                if (leg.linkIds.size() == 1 && leg.linkIds.get(0).equals(linkLeaveEvent.getLinkId().toString())) {
+                    return;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            var link = network.getLinks().get(linkLeaveEvent.getLinkId());
+            leg.coords.add(link.getToNode().getCoord());
+            leg.times.add(linkLeaveEvent.getTime());
+            leg.linkIds.add(linkLeaveEvent.getLinkId().toString());
     }
 
     private void writeLeg(Id<Person> personId, Leg leg) {
@@ -118,18 +121,22 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
             toWrite.setAttribute(TrajectoryFeatureType.agentId, personId.toString());
 
             // assume we have at least two values for time
-            toWrite.setAttribute(TrajectoryFeatureType.enterTime, new Date(leg.times.get(0).longValue()));
-            toWrite.setAttribute(TrajectoryFeatureType.exitTime, new Date(leg.times.get(leg.times.size() - 1).longValue()));
+            toWrite.setAttribute(TrajectoryFeatureType.enterTime, Date.from(Instant.ofEpochSecond(leg.times.get(0).longValue())));
+            toWrite.setAttribute(TrajectoryFeatureType.exitTime, Date.from(Instant.ofEpochSecond(leg.times.get(leg.times.size() - 1).longValue())));
 
             toWrite.setAttribute(TrajectoryFeatureType.isTeleported, leg.isTeleported);
             toWrite.setAttribute(TrajectoryFeatureType.mode, leg.mode);
+            toWrite.setAttribute(TrajectoryFeatureType.vehicleId, leg.vehicleId);
+
+            toWrite.setAttribute(TrajectoryFeatureType.linkIds, leg.linkIds);
+            toWrite.setAttribute(TrajectoryFeatureType.times, leg.times);
             toWrite.setAttribute(TrajectoryFeatureType.geometry, createLineStringString(leg));
 
             writer.write();
             counter++;
 
-            if (counter % 10 == 0) {
-                log.info("wrote: " + counter + " events");
+            if (counter % 10000 == 0) {
+                log.info("wrote: " + counter + " events, timestep is: " + leg.times.get(leg.times.size() - 1));
                 log.info("current feature: " + toWrite.toString());
             }
 
@@ -141,14 +148,21 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
     private static String createLineStringString(Leg leg) {
 
         var builder = new StringBuilder("LINESTRING (");
-        for (Coord coord : leg.coords) {
+
+        for (int i = 0; i < leg.coords.size(); i++) {
+            var coord = leg.coords.get(i);
             builder.append(coord.getX());
             builder.append(" ");
             builder.append(coord.getY());
-            builder.append(",");
+            if (i != leg.coords.size() - 1) builder.append(","); // no comma for last value
         }
         builder.append(")");
         return builder.toString();
+    }
+
+    @Override
+    public void handleEvent(TransitDriverStartsEvent transitDriverStartsEvent) {
+        transitDrivers.add(transitDriverStartsEvent.getDriverId());
     }
 
     private static class Leg {
@@ -157,6 +171,7 @@ public class TrajectoryToGeomesaHandler implements LinkEnterEventHandler, LinkLe
         private final List<Double> times = new ArrayList<>(); // replace this with an unboxed implementation
         private final List<String> linkIds = new ArrayList<>();
         private String mode;
+        private String vehicleId;
         private boolean isTeleported = true;
     }
 
