@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hadoop.version>3.2.1</hadoop.version>
         <geomesa.version>2.4.1</geomesa.version>
+        <matsim.version>12.0</matsim.version>
     </properties>
 
     <repositories>
@@ -51,6 +52,12 @@
             <groupId>org.locationtech.geomesa</groupId>
             <artifactId>geomesa-fs-storage-orc_2.11</artifactId>
             <version>${geomesa.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- hadoop dependencies which is used underneath geomesa fs -->
@@ -63,12 +70,22 @@
                     <groupId>javax.servlet.jsp</groupId>
                     <artifactId>jsp-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -79,32 +96,34 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-auth</artifactId>
             <version>${hadoop.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
+        <!-- matsim dependencies -->
         <dependency>
             <groupId>org.matsim</groupId>
             <artifactId>matsim</artifactId>
-            <version>12.0</version>
+            <version>${matsim.version}</version>
         </dependency>
         <dependency>
-            <!--MATSim examples.  Not inherited from matsim since it-->
-            <!--is in test scope there.  Leave in test scope since-->
-            <!--it is not in weekly releases and then causes problems.  -->
             <groupId>org.matsim</groupId>
             <artifactId>matsim-examples</artifactId>
-            <!--<version>0.10.0</version>-->
-            <!--<version>0.11.0-apr17</version>-->
             <scope>test</scope>
-            <version>12.0</version>
-            <!--(This has possibly no effect here, don't know.)-->
+            <version>${matsim.version}</version>
         </dependency>
         <dependency>
             <groupId>org.matsim</groupId>
             <artifactId>matsim</artifactId>
-            <version>12.0</version>
+            <version>${matsim.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
@@ -116,34 +135,11 @@
             <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13</version>
             <scope>test</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>3.0.1-b11</version>
-        </dependency>
--->
-        <!-- some dependencies of geomesa still use log4j 1 make them use log4j2 like this-->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
-
-
 </project>
