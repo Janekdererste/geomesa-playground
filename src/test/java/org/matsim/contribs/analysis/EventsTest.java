@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.time.Instant;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class EventsTest {
 
@@ -152,5 +153,12 @@ public class EventsTest {
 
         // some arbitrary number of legs between 2pm and 5pm
         assertEquals(236, timeResultSet.size());
+    }
+
+    @Test
+    public void testConfigUtils() {
+
+        var config = ConfigUtils.loadConfig(ExamplesUtils.getTestScenarioURL("equil").toString() + "config.xml");
+        assertNotNull(config);
     }
 }
