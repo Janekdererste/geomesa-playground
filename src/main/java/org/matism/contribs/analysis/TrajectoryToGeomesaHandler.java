@@ -20,6 +20,8 @@ import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
 
+import static org.matism.contribs.analysis.GeomesaFileSystemStore.TrajectorySchema.*;
+
 @Log4j2
 public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
@@ -30,7 +32,7 @@ public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandl
     private final Network network;
     private int counter = 0;
 
-    TrajectoryToGeomesaHandler(FeatureWriter<SimpleFeatureType, SimpleFeature> writer, Network network) {
+    public TrajectoryToGeomesaHandler(FeatureWriter<SimpleFeatureType, SimpleFeature> writer, Network network) {
         this.writer = writer;
         this.network = network;
     }
@@ -43,8 +45,8 @@ public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandl
         var leg = new Leg();
         leg.times.add(personDepartureEvent.getTime());
         leg.mode = personDepartureEvent.getLegMode();
-        var fromCoord = network.getLinks().get(personDepartureEvent.getLinkId()).getToNode().getCoord(); // I think we assume agents start at the end of a link
-        leg.coords.add(fromCoord);
+        var coord = network.getLinks().get(personDepartureEvent.getLinkId()).getToNode().getCoord(); // For now we assume agents start at the start of a link
+        leg.coords.add(coord);
         leg.linkIds.add(personDepartureEvent.getLinkId().toString());
 
         departed.put(personDepartureEvent.getPersonId(), leg);
@@ -94,48 +96,44 @@ public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandl
     @Override
     public void handleEvent(LinkLeaveEvent linkLeaveEvent) {
 
-            if (!personInVehicle.containsKey(linkLeaveEvent.getVehicleId())) return;
+        if (!personInVehicle.containsKey(linkLeaveEvent.getVehicleId())) return;
 
-            var person = personInVehicle.get(linkLeaveEvent.getVehicleId());
-            var leg = departed.get(person);
+        var person = personInVehicle.get(linkLeaveEvent.getVehicleId());
+        var leg = departed.get(person);
 
-            try {
-                // handle if departure event has already put in the first coordinate
-                if (leg.linkIds.size() == 1 && leg.linkIds.get(0).equals(linkLeaveEvent.getLinkId().toString())) {
-                    return;
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        // handle if departure event has already put in the first coordinate
+        if (leg.linkIds.size() == 1 && leg.linkIds.get(0).equals(linkLeaveEvent.getLinkId().toString())) {
+            return;
+        }
 
-            var link = network.getLinks().get(linkLeaveEvent.getLinkId());
-            leg.coords.add(link.getToNode().getCoord());
-            leg.times.add(linkLeaveEvent.getTime());
-            leg.linkIds.add(linkLeaveEvent.getLinkId().toString());
+        var link = network.getLinks().get(linkLeaveEvent.getLinkId());
+        leg.coords.add(link.getToNode().getCoord());
+        leg.times.add(linkLeaveEvent.getTime());
+        leg.linkIds.add(linkLeaveEvent.getLinkId().toString());
     }
 
     private void writeLeg(Id<Person> personId, Leg leg) {
 
         try {
             var toWrite = writer.next();
-            toWrite.setAttribute(TrajectoryFeatureType.agentId, personId.toString());
+            toWrite.setAttribute(AGENT_ID, personId.toString());
 
             // assume we have at least two values for time
-            toWrite.setAttribute(TrajectoryFeatureType.enterTime, Date.from(Instant.ofEpochSecond(leg.times.get(0).longValue())));
-            toWrite.setAttribute(TrajectoryFeatureType.exitTime, Date.from(Instant.ofEpochSecond(leg.times.get(leg.times.size() - 1).longValue())));
+            toWrite.setAttribute(ENTER_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(0).longValue())));
+            toWrite.setAttribute(EXIT_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(leg.times.size() - 1).longValue())));
 
-            toWrite.setAttribute(TrajectoryFeatureType.isTeleported, leg.isTeleported);
-            toWrite.setAttribute(TrajectoryFeatureType.mode, leg.mode);
-            toWrite.setAttribute(TrajectoryFeatureType.vehicleId, leg.vehicleId);
+            toWrite.setAttribute(IS_TELEPORTED, leg.isTeleported);
+            toWrite.setAttribute(MODE, leg.mode);
+            toWrite.setAttribute(VEHICLE_ID, leg.vehicleId);
 
-            toWrite.setAttribute(TrajectoryFeatureType.linkIds, leg.linkIds);
-            toWrite.setAttribute(TrajectoryFeatureType.times, leg.times);
-            toWrite.setAttribute(TrajectoryFeatureType.geometry, createLineStringString(leg));
+            toWrite.setAttribute(LINK_IDS, leg.linkIds);
+            toWrite.setAttribute(TIMES, leg.times);
+            toWrite.setAttribute(GEOMETRY, createLineStringString(leg));
 
             writer.write();
             counter++;
 
-            if (counter % 10000 == 0) {
+            if (counter % 1000 == 0) {
                 log.info("wrote: " + counter + " events, timestep is: " + leg.times.get(leg.times.size() - 1));
                 log.info("current feature: " + toWrite.toString());
             }
