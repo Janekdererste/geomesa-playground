@@ -16,6 +16,14 @@ export class MapComponent extends React.Component<MapProps> {
         this.mapContainer = React.createRef<HTMLDivElement>()
     }
 
+    public componentDidMount() {
+
+        if (!this.mapContainer.current) throw new Error('map div was not set!')
+
+        this.openlayers = new OpenLayers(this.mapContainer.current)
+        this.setMapSizeAfterTimeout(500)
+    }
+
     public render() {
         return (
             <div className={styles.map} ref={this.mapContainer}/>
