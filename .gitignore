@@ -1,5 +1,7 @@
 *.iml
 /.idea
-/target
-/test/output
+/server/target
+/server/test/output
 
+/client/dist/
+/client/node_modules/
