@@ -1,10 +1,8 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
-import org.locationtech.geomesa.utils.interop.SimpleFeatureTypes;
 import org.opengis.feature.simple.SimpleFeatureType;
-import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -8,7 +8,6 @@ import org.geotools.data.Transaction;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
-import org.locationtech.geomesa.fs.data.FileSystemDataStore;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.interop.SimpleFeatureTypes;
@@ -25,7 +24,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory2;
 
-import javax.print.DocFlavor;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -39,10 +37,10 @@ public class NetworkToGeomesa {
     private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:25832", "EPSG:4326");
 
     @Parameter(names = "-network")
-    private String networkFile = "";
+    private final String networkFile = "";
 
     @Parameter(names = "-storeRoot")
-    private String storeRoot = "";
+    private final String storeRoot = "";
 
     public static void main(String[] args) throws IOException, CQLException {
 

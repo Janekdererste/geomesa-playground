@@ -1,4 +1,4 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -6,11 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.filter.FilterFactoryImpl;
-import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.filter.text.ecql.ECQL;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
-import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
-import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -18,13 +14,11 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -32,13 +26,13 @@ import java.util.Map;
 public class EventsToGeomesa2 {
 
     @Parameter(names = "-e", required = true)
-    private String events = "";
+    private final String events = "";
 
     @Parameter(names = "-n", required = true)
-    private String networkFile = "";
+    private final String networkFile = "";
 
     @Parameter(names = "-store", required = true)
-    private String storeRoot = "";
+    private final String storeRoot = "";
 
     // this could be somewhat dynamic later on as well
     private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326");

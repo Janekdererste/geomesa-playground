@@ -1,9 +1,7 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
-import lombok.Generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.matsim.api.core.v01.network.Network;
 
 @RequiredArgsConstructor
 @Getter

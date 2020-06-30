@@ -1,16 +1,13 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
 import lombok.extern.log4j.Log4j2;
 import org.geotools.data.FeatureWriter;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
-import org.matsim.core.api.experimental.events.handler.AgentWaitingForPtEventHandler;
 import org.matsim.vehicles.Vehicle;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -19,8 +16,6 @@ import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
-
-import static org.matism.contribs.analysis.GeomesaFileSystemStore.TrajectorySchema.*;
 
 @Log4j2
 public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
@@ -116,19 +111,19 @@ public class TrajectoryToGeomesaHandler implements TransitDriverStartsEventHandl
 
         try {
             var toWrite = writer.next();
-            toWrite.setAttribute(AGENT_ID, personId.toString());
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.AGENT_ID, personId.toString());
 
             // assume we have at least two values for time
-            toWrite.setAttribute(ENTER_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(0).longValue())));
-            toWrite.setAttribute(EXIT_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(leg.times.size() - 1).longValue())));
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.ENTER_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(0).longValue())));
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.EXIT_TIME, Date.from(Instant.ofEpochSecond(leg.times.get(leg.times.size() - 1).longValue())));
 
-            toWrite.setAttribute(IS_TELEPORTED, leg.isTeleported);
-            toWrite.setAttribute(MODE, leg.mode);
-            toWrite.setAttribute(VEHICLE_ID, leg.vehicleId);
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.IS_TELEPORTED, leg.isTeleported);
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.MODE, leg.mode);
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.VEHICLE_ID, leg.vehicleId);
 
-            toWrite.setAttribute(LINK_IDS, leg.linkIds);
-            toWrite.setAttribute(TIMES, leg.times);
-            toWrite.setAttribute(GEOMETRY, createLineStringString(leg));
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.LINK_IDS, leg.linkIds);
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.TIMES, leg.times);
+            toWrite.setAttribute(GeomesaFileSystemStore.TrajectorySchema.GEOMETRY, createLineStringString(leg));
 
             writer.write();
             counter++;

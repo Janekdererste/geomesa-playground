@@ -1,7 +1,6 @@
 package org.matsim.contribs.analysis;
 
 import lombok.extern.log4j.Log4j2;
-import org.geotools.data.Query;
 import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
@@ -9,13 +8,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.matism.contribs.analysis.GeomesaFileSystemStore;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
-import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 
 import java.io.IOException;

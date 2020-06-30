@@ -1,25 +1,21 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.parquet.hadoop.util.ConfigurationUtil;
 import org.geotools.data.Query;
 import org.geotools.data.Transaction;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
-import org.locationtech.geomesa.fs.data.FileSystemDataStore;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.interop.SimpleFeatureTypes;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory2;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.invoke.SerializedLambda;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +25,11 @@ import java.util.UUID;
 public class EventsToGeomesa {
 
     // command line args taken from the example tutorial
-    private static Map<String, Serializable> params = Map.of("fs.path", "C:\\Users\\Janekdererste\\Desktop\\geo-mesa-test",
+    private static final Map<String, Serializable> params = Map.of("fs.path", "C:\\Users\\Janekdererste\\Desktop\\geo-mesa-test",
             "fs.encoding", "parquet");
 
-    @Parameter(names = "-e", required = false)
-    private String events = "";
+    @Parameter(names = "-e")
+    private final String events = "";
 
     public static void main(String[] args) throws IOException, CQLException {
 

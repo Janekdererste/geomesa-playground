@@ -1,8 +1,6 @@
-package org.matism.contribs.analysis;
+package org.matsim.contribs.analysis;
 
-import org.apache.avro.generic.GenericData;
 import org.geotools.data.*;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
@@ -60,6 +58,18 @@ public class GeomesaFileSystemStore {
 
         List<SimpleFeature> result = new ArrayList<>();
         try (var reader = getTrajectoryReader(filter)) {
+            while (reader.hasNext()) {
+                result.add(reader.next());
+            }
+        }
+
+        return result;
+    }
+
+    public Collection<SimpleFeature> getNetworkFeatureCollection(Filter filter) throws IOException {
+
+        List<SimpleFeature> result = new ArrayList<>();
+        try (var reader = getNetworkReader(filter)) {
             while (reader.hasNext()) {
                 result.add(reader.next());
             }

@@ -1,21 +1,15 @@
 package org.matsim.contribs.analysis;
 
 import org.geotools.filter.FilterFactoryImpl;
-import org.geotools.filter.text.ecql.ECQL;
 import org.junit.Rule;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.matism.contribs.analysis.GeomesaFileSystemStore;
-import org.matism.contribs.analysis.TrajectoryToGeomesaHandler;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
