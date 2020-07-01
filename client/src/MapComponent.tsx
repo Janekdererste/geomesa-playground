@@ -1,7 +1,7 @@
 import React from 'react'
 import OpenLayers from "@/OpenLayers";
 import Network from "@/Network";
-import {Link} from "@/NetworkResponse";
+import {Link, Trajectory} from "@/API";
 
 const styles = require('./MapComponent.css') as any
 
@@ -34,6 +34,17 @@ export class MapComponent extends React.Component<MapProps> {
         if (result.ok) {
             const networkResponse = await result.json() as Link[]
             this.openlayers.addNetwork(new Network(networkResponse))
+        }
+
+        const trajectoryResult = await fetch("http://localhost:8080/trajectory", {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (trajectoryResult.ok) {
+            const trajectoryResponse = await trajectoryResult.json() as Trajectory[]
+            this.openlayers.addTrajectories(trajectoryResponse);
         }
     }
 

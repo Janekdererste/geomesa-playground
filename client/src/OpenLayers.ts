@@ -8,6 +8,7 @@ import {ObjectEvent} from "ol/Object";
 import Rectangle from "@/Rectangle";
 import Network from "@/Network";
 import DataLayers from "@/DataLayers";
+import {Trajectory} from "@/API";
 
 const styles = require('./OpenLayers.css') as any
 
@@ -58,6 +59,12 @@ export default class OpenLayers {
         this.dataLayers.updateNetworkLayer(network)
     }
 
+    addTrajectories(trajectories: Trajectory[]) {
+
+        this.dataLayers.updateTrajectories(trajectories)
+
+    }
+
     private static onMapClicked(event: MapBrowserEvent) {
         console.log("here should be some click action")
         //this.layers.intersectCoordinate(event.coordinate, this.clock.AnimationTime)
@@ -92,4 +99,6 @@ export default class OpenLayers {
         this.adjustCamera(Rectangle.createFromExtend(extend))
         this.renderOneFrame()
     }
+
+
 }

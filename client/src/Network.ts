@@ -1,4 +1,4 @@
-import {Link} from "@/NetworkResponse";
+import {Link} from "@/API";
 
 export default class Network {
 

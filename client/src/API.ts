@@ -11,3 +11,9 @@ export interface Coord {
     y: number
 }
 
+export interface Trajectory {
+
+    coords: Coord[]
+    times: number[]
+}
+
