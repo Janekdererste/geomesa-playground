@@ -1,5 +1,7 @@
 import React from 'react'
 import OpenLayers from "@/OpenLayers";
+import Network from "@/Network";
+import {Link} from "@/NetworkResponse";
 
 const styles = require('./MapComponent.css') as any
 
@@ -16,12 +18,23 @@ export class MapComponent extends React.Component<MapProps> {
         this.mapContainer = React.createRef<HTMLDivElement>()
     }
 
-    public componentDidMount() {
+    public async componentDidMount() {
 
         if (!this.mapContainer.current) throw new Error('map div was not set!')
 
         this.openlayers = new OpenLayers(this.mapContainer.current)
         this.setMapSizeAfterTimeout(500)
+
+        const result = await fetch("http://localhost:8080/network", {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (result.ok) {
+            const networkResponse = await result.json() as Link[]
+            this.openlayers.addNetwork(new Network(networkResponse))
+        }
     }
 
     public render() {

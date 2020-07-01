@@ -6,14 +6,17 @@ import {OrthographicCamera, WebGLRenderer} from "three";
 import MapBrowserEvent from "ol/MapBrowserEvent";
 import {ObjectEvent} from "ol/Object";
 import Rectangle from "@/Rectangle";
+import Network from "@/Network";
+import DataLayers from "@/DataLayers";
 
 const styles = require('./OpenLayers.css') as any
 
 export default class OpenLayers {
     private map: Map;
-    private canvas: HTMLCanvasElement;
+    private readonly canvas: HTMLCanvasElement;
     private camera: OrthographicCamera;
     private renderer: WebGLRenderer;
+    private dataLayers: DataLayers
 
     constructor(container: HTMLDivElement) {
 
@@ -29,6 +32,8 @@ export default class OpenLayers {
         this.canvas.className = styles.overlay
         this.canvas.id = 'overlay-canvas '
         this.map.getViewport().appendChild(this.canvas)
+
+        this.dataLayers = new DataLayers()
 
         this.camera = new OrthographicCamera(0, 0, 0, 0, 1, 100)
         this.renderer = new WebGLRenderer({
@@ -49,15 +54,18 @@ export default class OpenLayers {
         this.map.updateSize()
     }
 
-    private static renderOneFrame() {
-        console.log("Here should be some render action")
-        // this.renderer.render(this.layers.Scene, this.camera)
-        // this.labelRenderer.render(this.layers.Scene, this.camera)
+    addNetwork(network: Network) {
+        this.dataLayers.updateNetworkLayer(network)
     }
 
     private static onMapClicked(event: MapBrowserEvent) {
         console.log("here should be some click action")
         //this.layers.intersectCoordinate(event.coordinate, this.clock.AnimationTime)
+    }
+
+    private renderOneFrame() {
+        this.renderer.render(this.dataLayers.Scene, this.camera)
+        // this.labelRenderer.render(this.layers.Scene, this.camera)
     }
 
     private onSizeChanged(event: ObjectEvent) {
@@ -68,13 +76,7 @@ export default class OpenLayers {
         // this.labelRenderer.setSize(this.canvas.width, this.canvas.height)
         const extend = this.map.getView().calculateExtent()
         this.adjustCamera(Rectangle.createFromExtend(extend))
-        OpenLayers.renderOneFrame()
-    }
-
-    private onOpenlayersFinishedRender() {
-        const extend = this.map.getView().calculateExtent()
-        this.adjustCamera(Rectangle.createFromExtend(extend))
-        OpenLayers.renderOneFrame()
+        this.renderOneFrame()
     }
 
     private adjustCamera(bounds: Rectangle) {
@@ -83,5 +85,11 @@ export default class OpenLayers {
         this.camera.top = bounds.Top
         this.camera.bottom = bounds.Bottom
         this.camera.updateProjectionMatrix()
+    }
+
+    private onOpenlayersFinishedRender() {
+        const extend = this.map.getView().calculateExtent()
+        this.adjustCamera(Rectangle.createFromExtend(extend))
+        this.renderOneFrame()
     }
 }

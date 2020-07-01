@@ -37,6 +37,7 @@ module.exports = {
                     },
                 ],
             },
+            {test: /\.(vert|frag)$/, loader: 'raw-loader'}
         ],
     },
     plugins: [new HTMLWebpackPlugin({template: path.resolve(__dirname, 'src/index.html')})],
