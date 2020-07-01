@@ -29,10 +29,6 @@ public class App extends Application<AppConfiguration> {
         log.info("Creating store at: " + appConfiguration.getStoreRoot());
         var store = new GeomesaFileSystemStore(appConfiguration.getStoreRoot());
 
-        log.info("Deleting previously ingested stuff");
-        store.wipe();
-        IngestDataFromLocalDisk.ingestNetwork(store, appConfiguration.getNetworkFile(), "EPSG:3857");
-
         log.info("Registering resources");
         var networkResource = new NetworkResource(store);
         environment.jersey().register(networkResource);

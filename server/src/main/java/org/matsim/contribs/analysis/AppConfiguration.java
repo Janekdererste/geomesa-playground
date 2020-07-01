@@ -14,12 +14,5 @@ import javax.validation.constraints.NotEmpty;
 public class AppConfiguration extends Configuration {
 
     @NotEmpty
-    @Getter
     private String storeRoot = "";
-
-    @NotEmpty
-    private String eventsFile = "";
-
-    @NotEmpty
-    private String networkFile = "";
 }
