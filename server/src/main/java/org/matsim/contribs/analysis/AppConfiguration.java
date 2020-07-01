@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 
+@SuppressWarnings("FieldMayBeFinal")
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,11 +15,11 @@ public class AppConfiguration extends Configuration {
 
     @NotEmpty
     @Getter
-    private final String storeRoot = "";
+    private String storeRoot = "";
 
     @NotEmpty
-    private final String eventsFile = "";
+    private String eventsFile = "";
 
     @NotEmpty
-    private final String networkFile = "";
+    private String networkFile = "";
 }
