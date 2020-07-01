@@ -2,7 +2,6 @@ package org.matsim.contribs.analysis;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.network.NetworkUtils;
@@ -42,7 +41,7 @@ public class NetworkResourceTest {
         }
     }
 
-    private void compareWithRounding(Coord expected, Coordinate actual) {
+    private void compareWithRounding(Coord expected, NetworkResource.SimpleCoordinate actual) {
 
         // pick a large delta to buffer rounding errors from coordinate transformation
         assertEquals(expected.getX(), actual.getX(), 0.1);

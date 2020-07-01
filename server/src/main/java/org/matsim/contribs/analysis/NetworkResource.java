@@ -19,8 +19,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Path("/network")
+@Produces(MediaType.APPLICATION_JSON)
+@RequiredArgsConstructor
 public class NetworkResource {
 
     private static final MathTransform transformation = createTransformation();
@@ -42,7 +43,6 @@ public class NetworkResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Collection<SimpleLink> getNetworkAsJson() throws IOException {
 
         var linkFeatures = store.getNetworkFeatureCollection(Filter.INCLUDE);
@@ -59,7 +59,7 @@ public class NetworkResource {
                         var linkId = (String) feature.getAttribute(GeomesaFileSystemStore.NetworkSchema.LINK_ID);
 
                         // assuming we have a line string with two points
-                        return new SimpleLink(coordinates[0], coordinates[1], linkId);
+                        return new SimpleLink(new SimpleCoordinate(coordinates[0]), new SimpleCoordinate(coordinates[1]), linkId);
 
                     } catch (TransformException e) {
                         throw new RuntimeException(e);
@@ -72,8 +72,20 @@ public class NetworkResource {
     @Getter
     static class SimpleLink {
 
-        private final Coordinate from;
-        private final Coordinate to;
+        private final SimpleCoordinate from;
+        private final SimpleCoordinate to;
         private final String linkId;
+    }
+
+    @Getter
+    static class SimpleCoordinate {
+
+        private final double x;
+        private final double y;
+
+        SimpleCoordinate(Coordinate coordinate) {
+            this.x = coordinate.getX();
+            this.y = coordinate.getY();
+        }
     }
 }

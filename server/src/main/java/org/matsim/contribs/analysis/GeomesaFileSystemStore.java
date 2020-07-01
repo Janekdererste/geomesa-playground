@@ -1,6 +1,7 @@
 package org.matsim.contribs.analysis;
 
 import org.geotools.data.*;
+import org.geotools.data.simple.SimpleFeatureStore;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
 import org.locationtech.geomesa.fs.storage.common.interop.ConfigurationUtils;
 import org.locationtech.geomesa.utils.geotools.SchemaBuilder;
@@ -48,7 +49,13 @@ public class GeomesaFileSystemStore {
         return store.getFeatureReader(query, Transaction.AUTO_COMMIT);
     }
 
-    public FeatureReader<SimpleFeatureType, SimpleFeature> getTrajectoryReader(Filter filter)  throws IOException {
+    public void wipe() throws IOException {
+
+        ((SimpleFeatureStore) store.getFeatureSource(NetworkSchema.getTypeName())).removeFeatures(Filter.INCLUDE);
+        ((SimpleFeatureStore) store.getFeatureSource(TrajectorySchema.getTypeName())).removeFeatures(Filter.INCLUDE);
+    }
+
+    public FeatureReader<SimpleFeatureType, SimpleFeature> getTrajectoryReader(Filter filter) throws IOException {
 
         var query = new Query(TrajectorySchema.getTypeName(), filter);
         return store.getFeatureReader(query, Transaction.AUTO_COMMIT);
