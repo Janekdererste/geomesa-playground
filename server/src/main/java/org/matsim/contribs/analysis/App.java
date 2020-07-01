@@ -30,8 +30,8 @@ public class App extends Application<AppConfiguration> {
         var store = new GeomesaFileSystemStore(appConfiguration.getStoreRoot());
 
         log.info("Registering resources");
-        var networkResource = new NetworkResource(store);
-        environment.jersey().register(networkResource);
+        environment.jersey().register(new NetworkResource(store));
+        environment.jersey().register(new TrajectoryResource(store));
 
         registerCORSFilter(environment.servlets());
     }

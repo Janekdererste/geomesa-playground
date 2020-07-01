@@ -3,6 +3,9 @@ package org.matsim.contribs.analysis;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import lombok.extern.slf4j.Slf4j;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
@@ -20,6 +23,7 @@ public class IngestDataFromLocalDisk {
 
         var store = new GeomesaFileSystemStore(args.storeRoot);
         ingestNetwork(store, args.networkFile, args.sourceCRS);
+        ingestEvents(store, args.eventsFile, args.networkFile, args.sourceCRS);
     }
 
     static class Args {
@@ -39,15 +43,7 @@ public class IngestDataFromLocalDisk {
 
     public static void ingestNetwork(GeomesaFileSystemStore store, String networkPath, String sourceCRS) throws IOException {
 
-        var transfromation = TransformationFactory.getCoordinateTransformation(sourceCRS, WGS_84);
-        var network = NetworkUtils.readNetwork(networkPath);
-
-        log.info("Transforming network from " + sourceCRS + " to " + WGS_84);
-        network.getNodes().values().parallelStream().forEach(node -> {
-
-            var transformedCoord = transfromation.transform(node.getCoord());
-            node.setCoord(transformedCoord);
-        });
+        var network = loadNetworkAndTransform(networkPath, sourceCRS);
 
         log.info("Start writing network into DataStore");
         try (var writer = store.getNetworkWriter()) {
@@ -67,5 +63,35 @@ public class IngestDataFromLocalDisk {
             }
         }
         log.info("Finished writing network into DataStore");
+    }
+
+    static void ingestEvents(GeomesaFileSystemStore store, String eventsPath, String networkPath, String sourceCrs) throws IOException {
+
+        log.info("Start ingesting events.");
+        var network = loadNetworkAndTransform(networkPath, sourceCrs);
+
+        try (var writer = store.getTrajectoryWriter()) {
+
+            var handler = new TrajectoryToGeomesaHandler(writer, network);
+            var manager = EventsUtils.createEventsManager();
+            manager.addHandler(handler);
+            log.info("Start parsing events");
+            new MatsimEventsReader(manager).readFile(eventsPath);
+            log.info("Finished parsing events");
+        }
+    }
+
+    private static Network loadNetworkAndTransform(String networkPath, String sourceCRS) {
+
+        var transfromation = TransformationFactory.getCoordinateTransformation(sourceCRS, WGS_84);
+        var network = NetworkUtils.readNetwork(networkPath);
+
+        log.info("Transforming network from " + sourceCRS + " to " + WGS_84);
+        network.getNodes().values().parallelStream().forEach(node -> {
+
+            var transformedCoord = transfromation.transform(node.getCoord());
+            node.setCoord(transformedCoord);
+        });
+        return network;
     }
 }
