@@ -25,7 +25,9 @@ public class NetworkResourceTest {
 
         // read data into store, using matsim equil-network. Using pseudo mercartor projection which is close to Atlantis crs used by equil network
         var store = new GeomesaFileSystemStore(testUtils.getOutputDirectory() + "store");
-        IngestDataFromLocalDisk.ingestNetwork(store, networkPath, "EPSG:3857");
+        var ingester = new IngestDataFromLocalDisk(store, networkPath, "", "EPSG:3857");
+        var network = IngestDataFromLocalDisk.loadNetworkAndTransform(networkPath, "EPSG:3857");
+        ingester.ingestNetwork(network);
 
         var resource = new NetworkResource(store);
         var result = resource.getNetworkAsJson();

@@ -3,10 +3,12 @@ package org.matsim.contribs.analysis;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -16,6 +18,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 public class TrajectoryResource {
 
     private static final MathTransform transformation = createTransformation();
+    private static final FilterFactory2 ff = new FilterFactoryImpl();
 
     private final GeomesaFileSystemStore store;
 
@@ -48,6 +53,12 @@ public class TrajectoryResource {
     public Collection<SimpleTrajectory> getTrajectoriesAsJson() throws IOException {
 
         // get all trajectories for now. This obviously is only suitable for small scenarios
+        var from = Date.from(Instant.ofEpochSecond(13 * 3600));
+        var to = Date.from(Instant.ofEpochSecond(14 * 3600));
+        var exitFilter = ff.between(ff.property(GeomesaFileSystemStore.TrajectorySchema.EXIT_TIME), ff.literal(from), ff.literal(to));
+        var enterFilter = ff.between(ff.property(GeomesaFileSystemStore.TrajectorySchema.ENTER_TIME), ff.literal(from), ff.literal(to));
+        var timeFilter = ff.and(enterFilter, exitFilter);
+
         var trajectoryFeatures = store.getTrajectoryFeatureCollection(Filter.INCLUDE);
         return trajectoryFeatures.stream()
                 .map(feature -> {

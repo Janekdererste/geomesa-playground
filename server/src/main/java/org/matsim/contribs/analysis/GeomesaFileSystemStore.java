@@ -1,5 +1,6 @@
 package org.matsim.contribs.analysis;
 
+import lombok.Getter;
 import org.geotools.data.*;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.locationtech.geomesa.fs.data.FileSystemDataStoreFactory;
@@ -17,9 +18,12 @@ import java.util.*;
 public class GeomesaFileSystemStore {
 
     private final DataStore store;
+    @Getter
+    private final String storeRoot;
 
     public GeomesaFileSystemStore(String storeRoot) throws IOException {
 
+        this.storeRoot = storeRoot;
         Map<String, Serializable> params = Map.of("fs.path", storeRoot, "fs.encoding", "parquet");
         var newStore = new FileSystemDataStoreFactory().createDataStore(params);
         var networkSchema = NetworkSchema.getSchema();

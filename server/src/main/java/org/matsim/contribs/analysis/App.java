@@ -9,6 +9,7 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 @Slf4j
@@ -32,6 +33,7 @@ public class App extends Application<AppConfiguration> {
         log.info("Registering resources");
         environment.jersey().register(new NetworkResource(store));
         environment.jersey().register(new TrajectoryResource(store));
+        environment.jersey().register(new InfoResource(Paths.get(appConfiguration.getStoreRoot()).resolve("SetInfo.json")));
 
         registerCORSFilter(environment.servlets());
     }
