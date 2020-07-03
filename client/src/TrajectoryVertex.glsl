@@ -25,4 +25,7 @@ void main() {
         vec3 interpolated = interpolate(position, toPosition, fromTime, toTime, time);
         gl_Position = projectionMatrix * modelViewMatrix * vec4(interpolated, 1.0);
     }
+
+
+    //gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

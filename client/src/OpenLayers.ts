@@ -9,6 +9,7 @@ import Rectangle from "@/Rectangle";
 import Network from "@/Network";
 import DataLayers from "@/DataLayers";
 import {Trajectory} from "@/API";
+import {AnimationClock, SimulationClock} from "@/Clock";
 
 const styles = require('./OpenLayers.css') as any
 
@@ -18,14 +19,19 @@ export default class OpenLayers {
     private camera: OrthographicCamera;
     private renderer: WebGLRenderer;
     private dataLayers: DataLayers
+    private runAnimation: boolean = false
+    private clock: AnimationClock;
 
-    constructor(container: HTMLDivElement) {
+    constructor(container: HTMLDivElement, clock: SimulationClock, center: [number, number]) {
+
+        // this will probably get here through dependecy injection later
+        this.clock = new AnimationClock(clock)
 
         // create openlayers map
         this.map = new Map({
             target: container,
             layers: [new TileLayer({source: new OSM()})],
-            view: new View({center: [0, 0], zoom: 12}),
+            view: new View({center: center, zoom: 5}),
         })
 
         // add a second canvas for the ThreeJS Overlay
@@ -57,17 +63,41 @@ export default class OpenLayers {
 
     addNetwork(network: Network) {
         this.dataLayers.updateNetworkLayer(network)
+        this.renderOneFrame()
     }
 
     addTrajectories(trajectories: Trajectory[]) {
 
         this.dataLayers.updateTrajectories(trajectories)
+        this.renderOneFrame()
 
+    }
+
+    startAnimation() {
+        if (!this.runAnimation) {
+            this.runAnimation = true
+            this.renderAnimation()
+        }
+    }
+
+    stopAnimation() {
+        if (this.runAnimation) {
+            this.runAnimation = false;
+        }
     }
 
     private static onMapClicked(event: MapBrowserEvent) {
         console.log("here should be some click action")
         //this.layers.intersectCoordinate(event.coordinate, this.clock.AnimationTime)
+    }
+
+    private renderAnimation() {
+        if (this.runAnimation) {
+            requestAnimationFrame(() => this.renderAnimation())
+            this.clock.advanceTime()
+            this.dataLayers.updateTime(this.clock.AnimationTime)
+            this.renderOneFrame()
+        }
     }
 
     private renderOneFrame() {
@@ -99,6 +129,4 @@ export default class OpenLayers {
         this.adjustCamera(Rectangle.createFromExtend(extend))
         this.renderOneFrame()
     }
-
-
 }

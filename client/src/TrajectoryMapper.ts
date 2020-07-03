@@ -2,7 +2,7 @@ import {Coord, Trajectory} from "@/API";
 
 export interface MovingPoints {
     positions: Float32Array
-    toPosition: Float32Array
+    toPositions: Float32Array
     fromTimes: Float32Array
     toTimes: Float32Array
     // colors: Float32Array do this later
@@ -31,7 +31,7 @@ export default class TrajectoryMapper {
 
         const fromCoords: number[] = []
         const toCoords: number[] = []
-        const times: number[] = []
+        const fromTimes: number[] = []
         const toTimes: number[] = []
 
         trajectories.forEach(trajectory => {
@@ -40,7 +40,7 @@ export default class TrajectoryMapper {
 
                 const coord = trajectory.coords[i]
                 TrajectoryMapper.pushCoord(fromCoords, coord)
-                times.push(trajectory.times[i])
+                fromTimes.push(trajectory.times[i])
 
                 const toCoord = trajectory.coords[i + 1]
                 TrajectoryMapper.pushCoord(toCoords, toCoord)
@@ -48,11 +48,16 @@ export default class TrajectoryMapper {
             }
         })
 
+        console.log(fromCoords)
+        console.log(fromTimes)
+        console.log(toCoords)
+        console.log(toTimes)
+
         return {
-            fromTimes: new Float32Array(times),
+            fromTimes: new Float32Array(fromTimes),
             toTimes: new Float32Array(toTimes),
             positions: new Float32Array(fromCoords),
-            toPosition: new Float32Array(toCoords),
+            toPositions: new Float32Array(toCoords),
         }
     }
 }

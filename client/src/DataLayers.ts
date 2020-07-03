@@ -67,10 +67,16 @@ export default class DataLayers {
 
         const mapper = new TrajectoryMapper(trajectories)
 
-        this.updateBufferAttribute(TRAJECTORY_LAYER, 'position', mapper.Vehicles.positions)
-        this.updateBufferAttribute(TRAJECTORY_LAYER, 'toPosition', mapper.Vehicles.toPosition)
-        this.updateBufferAttribute(TRAJECTORY_LAYER, 'fromTime', mapper.Vehicles.fromTimes)
-        this.updateBufferAttribute(TRAJECTORY_LAYER, 'toTime', mapper.Vehicles.toTimes)
+        this.updateBufferAttribute(TRAJECTORY_LAYER, 'position', mapper.Vehicles.positions, 3)
+        this.updateBufferAttribute(TRAJECTORY_LAYER, 'toPosition', mapper.Vehicles.toPositions, 3)
+        this.updateBufferAttribute(TRAJECTORY_LAYER, 'fromTime', mapper.Vehicles.fromTimes, 1)
+        this.updateBufferAttribute(TRAJECTORY_LAYER, 'toTime', mapper.Vehicles.toTimes, 1)
+    }
+
+    updateTime(time: number) {
+
+        const trajectoryLayer = this.scene.getObjectByName(TRAJECTORY_LAYER) as Points
+        (trajectoryLayer.material as ShaderMaterial).uniforms['time'].value = time
     }
 
     private initializeTrajectoryLayer() {
@@ -81,7 +87,7 @@ export default class DataLayers {
             uniforms: {
                 color: {value: new Color(0xff0000)},
                 size: {value: 20 * window.devicePixelRatio},
-                time: {value: 22158}
+                time: {value: 13 * 3600}
             },
             transparent: true,
         })
@@ -92,9 +98,9 @@ export default class DataLayers {
         this.scene.add(points)
     }
 
-    private updateBufferAttribute(layerName: string, attributeName: string, array: Float32Array) {
+    private updateBufferAttribute(layerName: string, attributeName: string, array: Float32Array, itemSize: number) {
         const layer = this.scene.getObjectByName(layerName) as Mesh
         const geometry = layer.geometry as BufferGeometry
-        geometry.setAttribute(attributeName, new BufferAttribute(array, 3))
+        geometry.setAttribute(attributeName, new BufferAttribute(array, itemSize))
     }
 }

@@ -17,3 +17,19 @@ export interface Trajectory {
     times: number[]
 }
 
+export interface SetInfo {
+
+    bbox: Rect
+    startTime: number
+    endTime: number
+
+}
+
+export interface Rect {
+
+    minX: number
+    minY: number
+    maxX: number
+    maxY: number
+}
+
