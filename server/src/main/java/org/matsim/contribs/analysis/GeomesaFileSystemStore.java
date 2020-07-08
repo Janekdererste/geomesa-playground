@@ -26,25 +26,29 @@ public class GeomesaFileSystemStore {
         this.storeRoot = storeRoot;
         Map<String, Serializable> params = Map.of("fs.path", storeRoot, "fs.encoding", "parquet");
         var newStore = new FileSystemDataStoreFactory().createDataStore(params);
-        var networkSchema = NetworkSchema.getSchema();
-        // this basically puts everything into one bucket. maybe change this depending on the network size when
-        // perfomance must be tweaked
-        ConfigurationUtils.setScheme(networkSchema, "xz2-2bit", Collections.emptyMap());
         newStore.createSchema(NetworkSchema.getSchema());
-        var trajectorySchema = TrajectorySchema.getSchema();
-        // sort data into hourly buckets. Also use 2bit geohash for file partitions as a starter - probably room for improvement.
-        ConfigurationUtils.setScheme(trajectorySchema, "daily,xz2-2bit", Collections.emptyMap());
         newStore.createSchema(TrajectorySchema.getSchema());
+        newStore.createSchema(GeometryLessSchema.getSchema());
         // eventually add other schemas
         this.store = newStore;
     }
 
     public FeatureWriter<SimpleFeatureType, SimpleFeature> getNetworkWriter() throws IOException {
-        return store.getFeatureWriterAppend(NetworkSchema.getSchema().getTypeName(), Transaction.AUTO_COMMIT);
+        return store.getFeatureWriterAppend(NetworkSchema.getTypeName(), Transaction.AUTO_COMMIT);
     }
 
     public FeatureWriter<SimpleFeatureType, SimpleFeature> getTrajectoryWriter() throws IOException {
-        return store.getFeatureWriterAppend(TrajectorySchema.getSchema().getTypeName(), Transaction.AUTO_COMMIT);
+        return store.getFeatureWriterAppend(TrajectorySchema.getTypeName(), Transaction.AUTO_COMMIT);
+    }
+
+    public FeatureWriter<SimpleFeatureType, SimpleFeature> getBla() throws IOException {
+        return store.getFeatureWriterAppend(GeometryLessSchema.getSchema().getTypeName(), Transaction.AUTO_COMMIT);
+    }
+
+    public FeatureReader<SimpleFeatureType, SimpleFeature> getBlaReader(Filter filter) throws IOException {
+
+        var query = new Query(GeometryLessSchema.getSchema().getTypeName(), filter);
+        return store.getFeatureReader(query, Transaction.AUTO_COMMIT);
     }
 
     public FeatureReader<SimpleFeatureType, SimpleFeature> getNetworkReader(Filter filter) throws IOException {
@@ -101,6 +105,10 @@ public class GeomesaFileSystemStore {
         private static final SimpleFeatureType schema = createShema();
 
         public static SimpleFeatureType getSchema() {
+            // this basically puts everything into one bucket. maybe change this depending on the network size when
+            // perfomance must be tweaked
+            // the user data is deleted every time a store creates its schemas. So, put it in every time schema is requested
+            ConfigurationUtils.setScheme(schema, "xz2-2bit", Collections.emptyMap());
             return schema;
         }
 
@@ -131,9 +139,16 @@ public class GeomesaFileSystemStore {
 
         private static final SimpleFeatureType schema = createSchema();
 
-        public static SimpleFeatureType getSchema() { return schema; }
+        public static SimpleFeatureType getSchema() {
+            // sort data into daily buckets. Also use 2bit geohash for file partitions as a starter - probably room for improvement.
+            ConfigurationUtils.setScheme(schema, "hourly,xz2-2bit", Collections.emptyMap());
+            schema.getUserData().put("geomesa.z3.interval", "hour");
+            return schema;
+        }
 
-        public static String getTypeName() { return schema.getTypeName(); }
+        public static String getTypeName() {
+            return schema.getTypeName();
+        }
 
         private static SimpleFeatureType createSchema() {
 
@@ -148,6 +163,26 @@ public class GeomesaFileSystemStore {
                     .addString(VEHICLE_ID).end()
                     .addString(AGENT_ID).withIndex().end() // set agent id as index, so that events trajectories can be filtered by agent
                     .build("trajectory");
+        }
+    }
+
+    public static class GeometryLessSchema {
+
+        public static final String ANY_FIELD = "bla";
+
+        private static final SimpleFeatureType schema = createSchema();
+
+        private static SimpleFeatureType getSchema() {
+
+            ConfigurationUtils.setScheme(schema, "attribute", Map.of("partitioned-attribute", "bla"));
+            return schema;
+        }
+
+        private static SimpleFeatureType createSchema() {
+
+            return SchemaBuilder.builder()
+                    .addString(ANY_FIELD).withIndex().end()
+                    .build("blup");
         }
     }
 
