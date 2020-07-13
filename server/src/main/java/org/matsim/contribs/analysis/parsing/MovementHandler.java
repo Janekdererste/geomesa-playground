@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.geotools.data.FeatureWriter;
+import org.geotools.filter.identity.FeatureIdImpl;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.matsim.api.core.v01.Coord;
@@ -79,7 +80,7 @@ public class MovementHandler implements
             var startedLinkTrip = startedLinkTrips.remove(event.getVehicleId());
             var personId = personsInVehicle.get(event.getVehicleId());
             var leg = startedLegs.get(personId);
-            writeLinkTrip(startedLinkTrip, event, personId, leg.getId());
+            writeLinkTrip(startedLinkTrip, event.getTime(), personId, leg.getId());
         }
     }
 
@@ -138,9 +139,17 @@ public class MovementHandler implements
         if (transitDrivers.contains(event.getPersonId())) return;
 
         personsInVehicle.remove(event.getVehicleId());
+
+        // finish up last link trip assuming agent travelled to the end of the link - if one wants to do this correctly use relativePosition
+        if (startedLinkTrips.containsKey(event.getVehicleId())) {
+            var enterEvent = startedLinkTrips.remove(event.getVehicleId());
+            var leg = startedLegs.get(event.getPersonId());
+            writeLinkTrip(enterEvent, event.getTime(), event.getPersonId(), leg.getId());
+        }
+
     }
 
-    private void writeLinkTrip(LinkEnterEvent start, LinkLeaveEvent end, Id<Person> personId, UUID legId) {
+    private void writeLinkTrip(LinkEnterEvent start, double endTime, Id<Person> personId, UUID legId) {
 
         var startCoord = network.getLinks().get(start.getLinkId()).getFromNode().getCoord();
         var endCoord = network.getLinks().get(start.getLinkId()).getToNode().getCoord();
@@ -152,9 +161,8 @@ public class MovementHandler implements
                     MGC.coord2Coordinate(startCoord), MGC.coord2Coordinate(endCoord)
             }));
             toWrite.setAttribute(LinkTripSchema.START_TIME, dateOf(start.getTime()));
-            toWrite.setAttribute(LinkTripSchema.END_TIME, dateOf(end.getTime()));
+            toWrite.setAttribute(LinkTripSchema.END_TIME, dateOf(endTime));
             toWrite.setAttribute(LinkTripSchema.PERSON_ID, personId);
-            toWrite.setAttribute(LinkTripSchema.VEHICLE_ID, start.getVehicleId());
             toWrite.setAttribute(LinkTripSchema.LEG_ID, legId);
 
             linkTripWriter.write();
@@ -166,12 +174,9 @@ public class MovementHandler implements
 
     private void writeLeg(Leg leg) {
 
-        var startCoord = network.getLinks().get(leg.getStartLink()).getToNode().getCoord();
-        var endCoord = network.getLinks().get(leg.getEndLink()).getToNode().getCoord();
-
         try {
-
             var toWrite = legWriter.next();
+            ((FeatureIdImpl) toWrite.getIdentifier()).setID(leg.getId().toString());
 
             toWrite.setAttribute(LegSchema.GEOMETRY, geometryFactory.createLineString(new Coordinate[]{
                     MGC.coord2Coordinate(leg.getStartCoord()), MGC.coord2Coordinate(leg.getEndCoord())

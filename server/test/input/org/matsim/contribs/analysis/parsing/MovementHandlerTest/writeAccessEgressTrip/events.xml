@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<events version="1.0">
+    <event time="0.0" type="actend" person="1" link="1" facility="f_auto_481708" actType="home"/>
+    <event time="0.0" type="departure" person="1" link="1" legMode="walk"/>
+    <event time="14.0" type="travelled" person="1" distance="19.564393048326142"/>
+    <event time="14.0" type="arrival" person="1" link="1" legMode="walk"/>
+    <event time="14.0" type="actstart" person="1" link="1" actType="car interaction"/>
+    <event time="14.0" type="actend" person="1" link="1" actType="car interaction"/>
+    <event time="14.0" type="departure" person="1" link="1" legMode="car"/>
+    <event time="14.0" type="PersonEntersVehicle" person="1" vehicle="1"/>
+    <event time="15.0" type="vehicle enters traffic" person="1" link="1" vehicle="1"
+           networkMode="car" relativePosition="1.0"/>
+    <event time="16.0" type="left link" vehicle="1" link="1"/>
+    <event time="16.0" type="entered link" vehicle="1" link="2"/>
+    <event time="33.0" type="left link" vehicle="1" link="2"/>
+    <event time="33.0" type="entered link" vehicle="1" link="3"/>
+
+    <event time="33.0" type="vehicle leaves traffic" person="1" link="3" vehicle="1"
+           networkMode="car" relativePosition="1.0"/>
+    <event time="33.0" type="PersonLeavesVehicle" person="1" vehicle="1"/>
+    <event time="33.0" type="arrival" person="1" link="3" legMode="car"/>
+    <event time="33.0" type="actstart" person="1" link="3" actType="car interaction"/>
+    <event time="33.0" type="actend" person="1" link="3" actType="car interaction"/>
+    <event time="33.0" type="departure" person="1" link="3" legMode="walk"/>
+    <event time="40.0" type="travelled" person="1" distance="79.9626686880722"/>
+    <event time="40.0" type="arrival" person="1" link="3" legMode="walk"/>
+    <event time="40.0" type="actstart" person="1" link="3" facility="f_auto_481709"
+           actType="work"/>
+</events>

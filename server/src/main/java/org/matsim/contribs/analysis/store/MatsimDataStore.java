@@ -40,7 +40,7 @@ public class MatsimDataStore {
         return dataStore.getFeatureWriterAppend(LegSchema.getTypeName(), Transaction.AUTO_COMMIT);
     }
 
-    public FeatureWriter<SimpleFeatureType, SimpleFeature> getLinkMovementWriter() throws IOException {
+    public FeatureWriter<SimpleFeatureType, SimpleFeature> getLinkTripWriter() throws IOException {
         return dataStore.getFeatureWriterAppend(LinkTripSchema.getTypeName(), Transaction.AUTO_COMMIT);
     }
 
@@ -52,6 +52,14 @@ public class MatsimDataStore {
 
     public void forEachActivity(Filter filter, Consumer<SimpleFeature> action) {
         forEach(ActivitySchema.getTypeName(), filter, action);
+    }
+
+    public void forEachLeg(Filter filter, Consumer<SimpleFeature> action) {
+        forEach(LegSchema.getTypeName(), filter, action);
+    }
+
+    public void forEachLinkTrip(Filter filter, Consumer<SimpleFeature> action) {
+        forEach(LinkTripSchema.getTypeName(), filter, action);
     }
 
     private void forEach(String schema, Filter filter, Consumer<SimpleFeature> action) {
@@ -71,9 +79,11 @@ public class MatsimDataStore {
         return dataStore.getFeatureReader(query, Transaction.AUTO_COMMIT);
     }
 
-    public FeatureReader<SimpleFeatureType, SimpleFeature> getLinkMovementReader(Filter filter) throws IOException {
+    public FeatureReader<SimpleFeatureType, SimpleFeature> getLinkTripReader(Filter filter) throws IOException {
 
         var query = new Query(LinkTripSchema.getTypeName(), filter);
         return dataStore.getFeatureReader(query, Transaction.AUTO_COMMIT);
     }
+
+
 }
