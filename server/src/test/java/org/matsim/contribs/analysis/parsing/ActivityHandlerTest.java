@@ -35,7 +35,7 @@ public class ActivityHandlerTest {
 
         try (var writer = store.getActivityWriter()) {
 
-            var handler = new ActivityHandler(writer, null);
+            var handler = new ActivityHandler(writer, null, null);
             var startEvent = new ActivityStartEvent(
                     1,
                     Id.createPersonId("1"),

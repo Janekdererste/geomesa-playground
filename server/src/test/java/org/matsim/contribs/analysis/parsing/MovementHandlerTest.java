@@ -7,17 +7,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contribs.analysis.store.LinkTripSchema;
 import org.matsim.contribs.analysis.store.MatsimDataStore;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.vehicles.Vehicle;
 import org.opengis.filter.Filter;
 import org.opengis.filter.identity.Identifier;
 
@@ -33,24 +30,32 @@ public class MovementHandlerTest {
     public MatsimTestUtils testUtils = new MatsimTestUtils();
 
     @Test
-    public void writeSingleLeg() throws IOException {
+    public void writeAndReadUtil2000Scenario() throws IOException {
 
         var storeRoot = testUtils.getOutputDirectory() + "store";
+        var transformation = TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326");
+        var eventsFile = "C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-2000-agent\\output_events.xml.gz";
+        var network = NetworkUtils.readNetwork("C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-2000-agent\\output_network.xml.gz");
         var store = new MatsimDataStore(storeRoot);
-        var network = createSimpleNetwork();
-        var pId = Id.createPersonId("1");
-        var vId = Id.create("1", Vehicle.class);
+
+        // transform network to wgs84
+        network.getNodes().values().parallelStream()
+                .forEach(node -> {
+                    var coord = transformation.transform(node.getCoord());
+                    node.setCoord(coord);
+                });
 
         try (var legWriter = store.getLegWriter(); var linkTripWriter = store.getLinkTripWriter()) {
 
             var handler = new MovementHandler(linkTripWriter, legWriter, network);
-
-            // access walk
-            handler.handleEvent(new PersonDepartureEvent(1, pId, Id.createLinkId(1), TransportMode.walk));
-            handler.handleEvent(new PersonArrivalEvent(14, pId, Id.createLinkId(1), TransportMode.walk));
-
-
+            var manager = EventsUtils.createEventsManager();
+            manager.addHandler(handler);
+            manager.initProcessing();
+            new MatsimEventsReader(manager).readFile(eventsFile);
+            manager.finishProcessing();
         }
+
+        store.forEachLinkTrip(Filter.INCLUDE, feature -> log.info(feature.toString()));
     }
 
     @Test

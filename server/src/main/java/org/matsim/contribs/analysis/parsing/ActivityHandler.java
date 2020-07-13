@@ -4,14 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.geotools.data.FeatureWriter;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contribs.analysis.store.ActivitySchema;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.facilities.ActivityFacilities;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -27,7 +28,10 @@ public class ActivityHandler implements ActivityStartEventHandler, ActivityEndEv
     private final FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
     private final Map<String, ActivityStartEvent> startedActivities = new HashMap<>();
     private final Map<String, ActivityEndEvent> wrapAroundActivities = new HashMap<>();
-    private final Scenario scenario;
+
+    // for now, we'll put in null for facilities. I guess this could be solved more elegantly
+    private final Network network;
+    private final ActivityFacilities facilities;
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
@@ -92,11 +96,11 @@ public class ActivityHandler implements ActivityStartEventHandler, ActivityEndEv
 
         if (event.getCoord() != null) return event.getCoord();
 
-        if (event.getFacilityId() != null && scenario.getActivityFacilities().getFacilities().containsKey(event.getFacilityId()))
-            return scenario.getActivityFacilities().getFacilities().get(event.getFacilityId()).getCoord();
+        if (event.getFacilityId() != null && facilities != null && facilities.getFacilities().containsKey(event.getFacilityId()))
+            return facilities.getFacilities().get(event.getFacilityId()).getCoord();
 
-        if (event.getLinkId() != null && scenario.getNetwork().getLinks().containsKey(event.getLinkId()))
-            return scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();
+        if (event.getLinkId() != null && network.getLinks().containsKey(event.getLinkId()))
+            return network.getLinks().get(event.getLinkId()).getCoord();
 
         throw new RuntimeException("Could not retreive coordinate for event: " + event.toString());
     }
