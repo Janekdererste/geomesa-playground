@@ -5,10 +5,11 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 import java.util.Collections;
 
-public class LinkMovementSchema implements IntervalSchema {
+public class LinkTripSchema implements IntervalSchema {
 
-    private static final String LINK_ID = "linkId";
-    private static final String LEG_ID = "legId";
+    public static final String LINK_ID = "linkId";
+    public static final String LEG_ID = "legId";
+    public static final String VEHICLE_ID = "vehicleId";
 
     private static final SimpleFeatureType schema = createSchema();
 
@@ -27,7 +28,7 @@ public class LinkMovementSchema implements IntervalSchema {
 
         return IntervalSchema.createBuilderWithDefaultValues()
                 .addLineString(GEOMETRY, true).end()
-                .addString(LEG_ID).withIndex().end()
+                .addUuid(LEG_ID).withIndex().end()
                 .addString(LINK_ID).end()
                 .build("linkMovements");
     }

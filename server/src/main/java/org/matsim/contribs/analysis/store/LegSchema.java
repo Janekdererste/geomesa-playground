@@ -7,11 +7,12 @@ import java.util.Collections;
 
 public class LegSchema implements IntervalSchema {
 
-    private static final String START_LINK_ID = "startLink";
-    private static final String END_LINK_ID = "endLink";
-    private static final String VEHICLE_ID = "vehicleId";
-    private static final String MODE = "mode";
-    private static final String TYPE = "type";
+    public static final String START_LINK_ID = "startLink";
+    public static final String END_LINK_ID = "endLink";
+    public static final String MODE = "mode";
+    public static final String TYPE = "type";
+
+    public enum LegType {NETWORK, TELEPORTED, PT_PASSENGER, PT_VEHICLE}
 
     private static final SimpleFeatureType schema = createSchema();
 
@@ -32,7 +33,6 @@ public class LegSchema implements IntervalSchema {
                 .addLineString(GEOMETRY, true).end()
                 .addString(START_LINK_ID).end()
                 .addString(END_LINK_ID).end()
-                .addString(VEHICLE_ID).end()
                 .addString(MODE).end()
                 .addString(TYPE).end()
                 .build("legs");

@@ -26,7 +26,7 @@ public class MatsimDataStore {
         var newStore = new FileSystemDataStoreFactory().createDataStore(params);
 
         newStore.createSchema(ActivitySchema.getSchema());
-        newStore.createSchema(LinkMovementSchema.getSchema());
+        newStore.createSchema(LinkTripSchema.getSchema());
         newStore.createSchema(LegSchema.getSchema());
 
         this.dataStore = newStore;
@@ -41,7 +41,7 @@ public class MatsimDataStore {
     }
 
     public FeatureWriter<SimpleFeatureType, SimpleFeature> getLinkMovementWriter() throws IOException {
-        return dataStore.getFeatureWriterAppend(LinkMovementSchema.getTypeName(), Transaction.AUTO_COMMIT);
+        return dataStore.getFeatureWriterAppend(LinkTripSchema.getTypeName(), Transaction.AUTO_COMMIT);
     }
 
     public FeatureReader<SimpleFeatureType, SimpleFeature> getActivityReader(Filter filter) throws IOException {
@@ -73,7 +73,7 @@ public class MatsimDataStore {
 
     public FeatureReader<SimpleFeatureType, SimpleFeature> getLinkMovementReader(Filter filter) throws IOException {
 
-        var query = new Query(LinkMovementSchema.getTypeName(), filter);
+        var query = new Query(LinkTripSchema.getTypeName(), filter);
         return dataStore.getFeatureReader(query, Transaction.AUTO_COMMIT);
     }
 }
