@@ -5,15 +5,15 @@ import org.geotools.data.FeatureWriter;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
+import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contribs.analysis.store.ActivitySchema;
-import org.matsim.core.api.internal.HasPersonId;
-import org.matsim.facilities.ActivityFacility;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.xml.sax.Attributes;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -22,50 +22,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class ActivityHandler {
+public class ActivityHandler implements ActivityStartEventHandler, ActivityEndEventHandler {
 
     private final FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
     private final Map<String, ActivityStartEvent> startedActivities = new HashMap<>();
     private final Map<String, ActivityEndEvent> wrapAroundActivities = new HashMap<>();
     private final Scenario scenario;
 
-    public void handleStart(double time, Attributes atts) {
+    @Override
+    public void handleEvent(ActivityStartEvent event) {
 
-        var facilityId = atts.getValue(HasFacilityId.ATTRIBUTE_FACILITY) == null ? null : Id.create(atts.getValue(HasFacilityId.ATTRIBUTE_FACILITY), ActivityFacility.class);
-        var linkId = Id.create(atts.getValue(HasLinkId.ATTRIBUTE_LINK), Link.class);
-        var event = new ActivityStartEvent(
-                time,
-                Id.create(atts.getValue(HasPersonId.ATTRIBUTE_PERSON), Person.class),
-                linkId,
-                facilityId,
-                atts.getValue(ActivityStartEvent.ATTRIBUTE_ACTTYPE),
-                extractLocation(atts, facilityId, linkId));
         var key = createKey(event.getPersonId(), event.getActType());
         startedActivities.put(key, event);
     }
 
-    public void handleEnd(double time, Attributes atts) {
+    @Override
+    public void handleEvent(ActivityEndEvent event) {
 
-        var personId = Id.create(atts.getValue(HasPersonId.ATTRIBUTE_PERSON), Person.class);
-        var actType = atts.getValue(ActivityEndEvent.ATTRIBUTE_ACTTYPE);
-
-        var key = createKey(personId, actType);
+        var key = createKey(event.getPersonId(), event.getActType());
         if (startedActivities.containsKey(key)) {
-            var activity = startedActivities.remove(key);
-            writeActivity(activity, time);
-        } else {
-
-            var facilityId = atts.getValue(HasFacilityId.ATTRIBUTE_FACILITY) == null ? null : Id.create(atts.getValue(HasFacilityId.ATTRIBUTE_FACILITY), ActivityFacility.class);
-            var linkId = Id.create(atts.getValue(HasLinkId.ATTRIBUTE_LINK), Link.class);
-            var event = new ActivityEndEvent(
-                    time,
-                    personId,
-                    linkId,
-                    facilityId,
-                    actType
-            );
-
-            wrapAroundActivities.put(key, event);
+            var startEvent = startedActivities.remove(key);
+            writeActivity(startEvent, event.getTime());
         }
     }
 
@@ -76,7 +53,6 @@ public class ActivityHandler {
             if (startedActivities.containsKey(entry.getKey())) {
                 var start = startedActivities.get(entry.getKey());
                 var end = entry.getValue();
-
                 writeActivity(start, end.getTime());
             }
         }
@@ -87,9 +63,10 @@ public class ActivityHandler {
         try {
             var toWrite = writer.next();
 
+            var location = extractLocation(start);
+            toWrite.setAttribute(ActivitySchema.GEOMETRY, MGC.coord2Point(location));
             toWrite.setAttribute(ActivitySchema.START_TIME, Date.from(Instant.ofEpochSecond((long) start.getTime())));
             toWrite.setAttribute(ActivitySchema.END_TIME, Date.from(Instant.ofEpochSecond((long) endTime)));
-            toWrite.setAttribute(ActivitySchema.GEOMETRY, "POINT(" + start.getCoord().getX() + " " + start.getCoord().getY() + ")");
             toWrite.setAttribute(ActivitySchema.TYPE, start.getActType());
             toWrite.setAttribute(ActivitySchema.PERSON_ID, start.getPersonId());
             toWrite.setAttribute(ActivitySchema.FACILITY_ID, start.getFacilityId());
@@ -111,17 +88,18 @@ public class ActivityHandler {
     /**
      * Takes coord from event if possible, then from facility if possible, then from link as fallback
      */
-    private Coord extractLocation(Attributes atts, Id<ActivityFacility> facilityId, Id<Link> linkId) {
+    private Coord extractLocation(ActivityStartEvent event) {
 
-        if (atts.getValue(Event.ATTRIBUTE_X) != null && atts.getValue(Event.ATTRIBUTE_Y) != null) {
-            return new Coord(Double.parseDouble(atts.getValue(Event.ATTRIBUTE_X)), Double.parseDouble(Event.ATTRIBUTE_Y));
-        }
-        if (facilityId != null && scenario.getActivityFacilities().getFacilities().containsKey(facilityId)) {
-            return scenario.getActivityFacilities().getFacilities().get(facilityId).getCoord();
-        }
-        if (linkId != null && scenario.getNetwork().getLinks().containsKey(linkId)) {
-            return scenario.getNetwork().getLinks().get(linkId).getCoord();
-        }
-        throw new RuntimeException("Could not retreive coordinate for event: " + atts.toString());
+        if (event.getCoord() != null) return event.getCoord();
+
+        if (event.getFacilityId() != null && scenario.getActivityFacilities().getFacilities().containsKey(event.getFacilityId()))
+            return scenario.getActivityFacilities().getFacilities().get(event.getFacilityId()).getCoord();
+
+        if (event.getLinkId() != null && scenario.getNetwork().getLinks().containsKey(event.getLinkId()))
+            return scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();
+
+        throw new RuntimeException("Could not retreive coordinate for event: " + event.toString());
     }
+
+
 }

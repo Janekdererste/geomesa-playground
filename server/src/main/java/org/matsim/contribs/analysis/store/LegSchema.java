@@ -17,8 +17,8 @@ public class LegSchema implements IntervalSchema {
 
     public static SimpleFeatureType getSchema() {
 
-        ConfigurationUtils.setScheme(schema, "hourly,xz2-2bit", Collections.emptyMap());
-        schema.getUserData().put("geomesa.z3.interval", "hour");
+        ConfigurationUtils.setScheme(schema, "daily,xz2-2bit", Collections.emptyMap());
+        schema.getUserData().put("geomesa.z3.interval", "day");
         return schema;
     }
 

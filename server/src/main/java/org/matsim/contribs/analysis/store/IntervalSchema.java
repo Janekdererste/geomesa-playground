@@ -9,7 +9,7 @@ public interface IntervalSchema {
     String END_TIME = "endTime";
     String PERSON_ID = "personId";
 
-    static SchemaBuilder createBuilderWithDefaultValues() {
+    static SchemaBuilder.AbstractSchemaBuilder<SchemaBuilder.AttributeBuilder, ? extends SchemaBuilder.AbstractUserDataBuilder<?>> createBuilderWithDefaultValues() {
         return SchemaBuilder.builder()
                 .addDate(START_TIME, false).end()
                 .addDate(END_TIME, true).end()

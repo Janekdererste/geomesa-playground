@@ -1,13 +1,13 @@
 package org.matsim.contribs.analysis.parsing;
 
 import lombok.RequiredArgsConstructor;
-import org.matsim.contribs.analysis.store.MatsimRunStore;
+import org.matsim.contribs.analysis.store.MatsimDataStore;
 import org.xml.sax.Attributes;
 
 @RequiredArgsConstructor
 public class MovementHandler {
 
-    private final MatsimRunStore store;
+    private final MatsimDataStore store;
 
     public void handleDeparture(double time, Attributes atts) {
     }
