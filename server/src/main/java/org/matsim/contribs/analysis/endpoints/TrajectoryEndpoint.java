@@ -41,7 +41,7 @@ public class TrajectoryEndpoint {
         // again results should be streamed for performance reasons, but this does for now
         List<LinkTrip> result = new ArrayList<>();
 
-        store.forEachLink(filter, feature -> {
+        store.forEachLinkTrip(filter, feature -> {
             try {
 
                 var geometry = (Geometry) feature.getDefaultGeometry();

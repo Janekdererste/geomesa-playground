@@ -52,11 +52,10 @@ public class TrajectoryEndpointTest {
         var endpoint = new TrajectoryEndpoint(store);
 
         // this should get the second feature since it crosses this time period
-        var result = endpoint.getTrajectories(0, 3600);
+        var result = endpoint.getTrajectories(1000, 1100);
 
         assertEquals(1, result.size());
         var linkTrip = result.iterator().next();
         assertEquals(601, linkTrip.getStartTime());
     }
-
 }
