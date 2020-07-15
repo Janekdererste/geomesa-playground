@@ -6,6 +6,10 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.matsim.contribs.analysis.endpoints.InfoEndpoint;
+import org.matsim.contribs.analysis.endpoints.NetworkEndpoint;
+import org.matsim.contribs.analysis.endpoints.TrajectoryEndpoint;
+import org.matsim.contribs.analysis.store.MatsimDataStore;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -28,12 +32,12 @@ public class App extends Application<AppConfiguration> {
     public void run(AppConfiguration appConfiguration, Environment environment) throws Exception {
 
         log.info("Creating store at: " + appConfiguration.getStoreRoot());
-        var store = new GeomesaFileSystemStore(appConfiguration.getStoreRoot());
+        var store = new MatsimDataStore(appConfiguration.getStoreRoot());
 
         log.info("Registering resources");
-        environment.jersey().register(new NetworkResource(store));
-        environment.jersey().register(new TrajectoryResource(store));
-        environment.jersey().register(new InfoResource(Paths.get(appConfiguration.getStoreRoot()).resolve("SetInfo.json")));
+        environment.jersey().register(new NetworkEndpoint(store));
+        environment.jersey().register(new TrajectoryEndpoint(store));
+        environment.jersey().register(new InfoEndpoint(Paths.get(appConfiguration.getStoreRoot()).resolve("SetInfo.json")));
 
         registerCORSFilter(environment.servlets());
     }

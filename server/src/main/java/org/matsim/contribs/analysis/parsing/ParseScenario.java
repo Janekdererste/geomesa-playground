@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contribs.analysis.SetInformation;
@@ -14,6 +15,7 @@ import org.matsim.contribs.analysis.store.LinkSchema;
 import org.matsim.contribs.analysis.store.MatsimDataStore;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.events.handler.BasicEventHandler;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -83,9 +85,17 @@ public class ParseScenario {
 
             var movementHandler = new MovementHandler(linkTripWriter, legWriter, network);
             var activityHandler = new ActivityHandler(activityWriter, network, null);
+            var timeHandler = new BasicEventHandler() {
+
+                @Override
+                public void handleEvent(Event event) {
+                    setInfo.adjustStartAndEndTime(event.getTime());
+                }
+            };
             var manager = EventsUtils.createEventsManager();
             manager.addHandler(movementHandler);
             manager.addHandler(activityHandler);
+            manager.addHandler(timeHandler);
             manager.initProcessing();
             new MatsimEventsReader(manager).readFile(eventsFile);
             manager.finishProcessing();
@@ -118,6 +128,8 @@ public class ParseScenario {
 
     private void writeSetInfo() throws IOException {
         Path infoPath = Paths.get(store.getStoreRoot()).resolve("SetInfo.json");
+
+        log.info("Writing set info to: " + infoPath);
         var mapper = new ObjectMapper();
         mapper.writeValue(new File(infoPath.toString()), setInfo);
     }

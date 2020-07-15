@@ -16,7 +16,7 @@ public class SetInformation {
     private double startTime = Double.POSITIVE_INFINITY;
     private double endTime = Double.NEGATIVE_INFINITY;
 
-    void adjustStartAndEndTime(double time) {
+    public void adjustStartAndEndTime(double time) {
         if (startTime > time) startTime = time;
         if (endTime < time) endTime = time;
     }
