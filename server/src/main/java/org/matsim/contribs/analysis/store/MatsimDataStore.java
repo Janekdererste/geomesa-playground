@@ -28,6 +28,7 @@ public class MatsimDataStore {
         newStore.createSchema(ActivitySchema.getSchema());
         newStore.createSchema(LinkTripSchema.getSchema());
         newStore.createSchema(LegSchema.getSchema());
+        newStore.createSchema(LinkSchema.getSchema());
 
         this.dataStore = newStore;
     }
@@ -42,6 +43,10 @@ public class MatsimDataStore {
 
     public FeatureWriter<SimpleFeatureType, SimpleFeature> getLinkTripWriter() throws IOException {
         return dataStore.getFeatureWriterAppend(LinkTripSchema.getTypeName(), Transaction.AUTO_COMMIT);
+    }
+
+    public FeatureWriter<SimpleFeatureType, SimpleFeature> getLinkWriter() throws IOException {
+        return dataStore.getFeatureWriterAppend(LinkSchema.getTypeName(), Transaction.AUTO_COMMIT);
     }
 
     public FeatureReader<SimpleFeatureType, SimpleFeature> getActivityReader(Filter filter) throws IOException {
@@ -60,6 +65,10 @@ public class MatsimDataStore {
 
     public void forEachLinkTrip(Filter filter, Consumer<SimpleFeature> action) {
         forEach(LinkTripSchema.getTypeName(), filter, action);
+    }
+
+    public void forEachLink(Filter filter, Consumer<SimpleFeature> action) {
+        forEach(LinkSchema.getTypeName(), filter, action);
     }
 
     private void forEach(String schema, Filter filter, Consumer<SimpleFeature> action) {
