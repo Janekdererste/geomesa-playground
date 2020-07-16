@@ -29,7 +29,7 @@ export class AnimationClock {
 
 export class SimulationClock {
 
-    private playbackSpeed: number = 200
+    private playbackSpeed: number = 50
     private time: number
     private startTime: number
     private endTime: number

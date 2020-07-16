@@ -4,12 +4,15 @@ import Network from "@/Network";
 import NetworkLayer from "@/NetworkLayer";
 import TrafficAnimationLayer from "@/TrafficAnimationLayer";
 import {AnimationClock, SimulationClock} from "@/Clock";
-import {LinkTrip} from "@/API";
+import Api from "@/API";
 
 export interface RenderLayerProps {
 
     canvas: HTMLCanvasElement,
     clock: SimulationClock,
+    api: Api,
+    startTime: number,
+    endTime: number
 }
 
 // maybe come up with a better name
@@ -36,7 +39,7 @@ export default class RenderLayer {
         this.renderer.setPixelRatio(window.devicePixelRatio)
 
         // slightly inconsistent with how the network layer is added, maybe change at some point
-        this.animationLayer = new TrafficAnimationLayer()
+        this.animationLayer = new TrafficAnimationLayer(props.api, props.startTime, props.endTime)
         this.scene.add(this.animationLayer.sceneObject)
 
         this.clock = new AnimationClock(props.clock)
@@ -47,11 +50,6 @@ export default class RenderLayer {
         // probably we need to keep a reference to the network layer
         this.scene.add(networkLayer.sceneObject)
         if (!this.runAnimation) this.renderSingleFrame()
-    }
-
-    updateTrajectories(linkTrips: LinkTrip[]) {
-
-        this.animationLayer.updateTrajectories(linkTrips)
     }
 
     adjustExtent(extent: Rectangle) {
