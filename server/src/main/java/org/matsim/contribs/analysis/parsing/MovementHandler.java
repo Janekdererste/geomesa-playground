@@ -80,7 +80,7 @@ public class MovementHandler implements
             var startedLinkTrip = startedLinkTrips.remove(event.getVehicleId());
             var personId = personsInVehicle.get(event.getVehicleId());
             var leg = startedLegs.get(personId);
-            writeLinkTrip(startedLinkTrip, event.getTime(), personId, leg.getId());
+            writeLinkTrip(startedLinkTrip, event.getTime(), personId, leg.getId(), leg.getMode());
         }
     }
 
@@ -144,12 +144,12 @@ public class MovementHandler implements
         if (startedLinkTrips.containsKey(event.getVehicleId())) {
             var enterEvent = startedLinkTrips.remove(event.getVehicleId());
             var leg = startedLegs.get(event.getPersonId());
-            writeLinkTrip(enterEvent, event.getTime(), event.getPersonId(), leg.getId());
+            writeLinkTrip(enterEvent, event.getTime(), event.getPersonId(), leg.getId(), leg.getMode());
         }
 
     }
 
-    private void writeLinkTrip(LinkEnterEvent start, double endTime, Id<Person> personId, UUID legId) {
+    private void writeLinkTrip(LinkEnterEvent start, double endTime, Id<Person> personId, UUID legId, String mode) {
 
         var startCoord = network.getLinks().get(start.getLinkId()).getFromNode().getCoord();
         var endCoord = network.getLinks().get(start.getLinkId()).getToNode().getCoord();
@@ -164,6 +164,8 @@ public class MovementHandler implements
             toWrite.setAttribute(LinkTripSchema.END_TIME, dateOf(endTime));
             toWrite.setAttribute(LinkTripSchema.PERSON_ID, personId);
             toWrite.setAttribute(LinkTripSchema.LEG_ID, legId);
+            toWrite.setAttribute(LinkTripSchema.LINK_ID, start.getLinkId().toString());
+            toWrite.setAttribute(LinkTripSchema.MODE, mode);
 
             linkTripWriter.write();
 

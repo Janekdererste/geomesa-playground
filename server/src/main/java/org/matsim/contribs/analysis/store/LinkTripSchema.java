@@ -9,7 +9,7 @@ public class LinkTripSchema implements IntervalSchema {
 
     public static final String LINK_ID = "linkId";
     public static final String LEG_ID = "legId";
-    public static final String VEHICLE_ID = "vehicleId";
+    public static final String MODE = "mode";
 
     private static final SimpleFeatureType schema = createSchema();
 
@@ -30,6 +30,7 @@ public class LinkTripSchema implements IntervalSchema {
                 .addLineString(GEOMETRY, true).end()
                 .addUuid(LEG_ID).withIndex().end()
                 .addString(LINK_ID).end()
+                .addString(MODE).end() // if one really wants to save space this could be a byte with a translation in the setinfo
                 .build("linkMovements");
     }
 }

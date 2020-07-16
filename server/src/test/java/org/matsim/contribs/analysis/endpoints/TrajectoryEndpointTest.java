@@ -33,6 +33,8 @@ public class TrajectoryEndpointTest {
             toWrite.setAttribute(LinkTripSchema.END_TIME, new Date(600 * 1000)); // a 10 minutes link trip
             toWrite.setAttribute(LinkTripSchema.PERSON_ID, "1");
             toWrite.setAttribute(LinkTripSchema.LEG_ID, UUID.randomUUID());
+            toWrite.setAttribute(LinkTripSchema.LINK_ID, "1");
+            toWrite.setAttribute(LinkTripSchema.MODE, "car");
 
             log.info(toWrite.toString());
             writer.write();
@@ -44,6 +46,8 @@ public class TrajectoryEndpointTest {
             toWrite2.setAttribute(LinkTripSchema.END_TIME, new Date(1200 * 1000)); // a 10 minutes link trip
             toWrite2.setAttribute(LinkTripSchema.PERSON_ID, "1");
             toWrite2.setAttribute(LinkTripSchema.LEG_ID, UUID.randomUUID());
+            toWrite2.setAttribute(LinkTripSchema.LINK_ID, "2");
+            toWrite2.setAttribute(LinkTripSchema.MODE, "car");
 
             log.info(toWrite2.toString());
             writer.write();
@@ -56,6 +60,8 @@ public class TrajectoryEndpointTest {
 
         assertEquals(1, result.size());
         var linkTrip = result.iterator().next();
-        assertEquals(601, linkTrip.getStartTime());
+        assertEquals(601, linkTrip.getFromTime());
+        assertEquals("car", linkTrip.getMode());
+        assertEquals(1200, linkTrip.getToTime());
     }
 }

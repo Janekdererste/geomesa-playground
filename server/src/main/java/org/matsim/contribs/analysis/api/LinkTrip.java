@@ -9,6 +9,7 @@ public class LinkTrip {
 
     private final SimpleCoordinate from;
     private final SimpleCoordinate to;
-    private final long startTime;
-    private final long endTime;
+    private final long fromTime;
+    private final long toTime;
+    private final String mode;
 }

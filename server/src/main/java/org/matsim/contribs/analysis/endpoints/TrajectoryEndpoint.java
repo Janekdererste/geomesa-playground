@@ -14,7 +14,9 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,6 +31,7 @@ public class TrajectoryEndpoint {
     private final MatsimDataStore store;
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Collection<LinkTrip> getTrajectories(@QueryParam("fromTime") long fromTime, @QueryParam("toTime") long toTime) {
 
         var from = new Date(fromTime * 1000);
@@ -50,11 +53,13 @@ public class TrajectoryEndpoint {
                 var coordinates = mercatorGeometry.getCoordinates();
                 var startTime = (Date) feature.getAttribute(LinkTripSchema.START_TIME);
                 var endTime = (Date) feature.getAttribute(LinkTripSchema.END_TIME);
+                var mode = (String) feature.getAttribute(LinkTripSchema.MODE);
 
                 var wireFormat = new LinkTrip(
                         new SimpleCoordinate(coordinates[0]),
                         new SimpleCoordinate(coordinates[1]),
-                        startTime.getTime() / 1000, endTime.getTime() / 1000
+                        startTime.getTime() / 1000, endTime.getTime() / 1000,
+                        mode
                 );
 
                 result.add(wireFormat);
