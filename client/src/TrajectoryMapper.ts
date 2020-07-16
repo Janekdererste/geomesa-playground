@@ -1,4 +1,4 @@
-import {Coord, Trajectory} from "@/API";
+import {Coord, LinkTrip} from "@/API";
 
 export interface MovingPoints {
     positions: Float32Array
@@ -12,7 +12,7 @@ export default class TrajectoryMapper {
 
     private vehicles: MovingPoints
 
-    constructor(trajectories: Trajectory[]) {
+    constructor(trajectories: LinkTrip[]) {
 
         this.vehicles = this.createVehicles(trajectories)
     }
@@ -27,25 +27,19 @@ export default class TrajectoryMapper {
         pushInto.push(0)
     }
 
-    private createVehicles(trajectories: Trajectory[]) {
+    private createVehicles(linkTrips: LinkTrip[]) {
 
         const fromCoords: number[] = []
         const toCoords: number[] = []
         const fromTimes: number[] = []
         const toTimes: number[] = []
 
-        trajectories.forEach(trajectory => {
+        linkTrips.forEach(linkTrip => {
 
-            for (let i = 0; i < trajectory.coords.length - 1; i++) {
-
-                const coord = trajectory.coords[i]
-                TrajectoryMapper.pushCoord(fromCoords, coord)
-                fromTimes.push(trajectory.times[i])
-
-                const toCoord = trajectory.coords[i + 1]
-                TrajectoryMapper.pushCoord(toCoords, toCoord)
-                toTimes.push(trajectory.times[i + 1])
-            }
+            TrajectoryMapper.pushCoord(fromCoords, linkTrip.from)
+            TrajectoryMapper.pushCoord(toCoords, linkTrip.to)
+            fromTimes.push(linkTrip.fromTime)
+            toTimes.push(linkTrip.toTime)
         })
 
         console.log(fromCoords)

@@ -11,10 +11,13 @@ export interface Coord {
     y: number
 }
 
-export interface Trajectory {
+export interface LinkTrip {
 
-    coords: Coord[]
-    times: number[]
+    from: Coord
+    to: Coord
+    fromTime: number
+    toTime: number
+    mode: String
 }
 
 export interface SetInfo {
@@ -31,5 +34,52 @@ export interface Rect {
     minY: number
     maxX: number
     maxY: number
+}
+
+export default class Api {
+
+    private endpoint: string
+
+    constructor(endpoint: string) {
+        this.endpoint = endpoint
+    }
+
+    public async getInfo() {
+
+        const result = await fetch(this.endpoint + "/info", {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (result.ok) return await result.json() as SetInfo
+        else throw new Error("Could not fetch Set information.!!!!1!")
+    }
+
+    public async getNetwork(mode: String) {
+        const result = await fetch(this.endpoint + "/network?modes=" + mode, {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (result.ok) {
+            return await result.json() as Link[]
+        } else {
+            throw new Error("error while fetching network!")
+        }
+    }
+
+    public async getTrajectories(fromTime: number, toTime: number) {
+
+        const result = await fetch(this.endpoint + "/trajectory?fromTime=" + fromTime + "&toTime=" + toTime, {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (result.ok) return await result.json() as LinkTrip[]
+        else throw new Error("Error while fetching trajectories")
+    }
 }
 
