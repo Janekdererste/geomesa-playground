@@ -1,4 +1,4 @@
-import SceneLayer from "@/SceneLayer";
+import SceneLayer from "@/customRendering/SceneLayer";
 import {BufferAttribute, BufferGeometry, Color, Mesh, Points, ShaderMaterial} from "three";
 import Api, {Coord, LinkTrip} from "@/API";
 
@@ -12,9 +12,9 @@ export default class TrafficAnimationLayer extends SceneLayer {
     private nextBucketChangeTime: number = 0
     private store: LinkTripStore
 
-    constructor(api: Api, startTime: number, endTime: number) {
+    constructor() {
         super(TrafficAnimationLayer.init());
-        this.store = new LinkTripStore(api, startTime, endTime)
+        this.store = new LinkTripStore({} as Api, 0, 0)
     }
 
     private static init() {

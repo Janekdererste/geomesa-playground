@@ -1,10 +1,7 @@
 import React from 'react'
-import Network from "@/Network";
-import Api from "@/API";
-import {SimulationClock} from "@/Clock";
-import MapLayer from "@/MapLayer";
+import MapLayer from "@/customRendering/MapLayer";
 import Rectangle from "@/Rectangle";
-import RenderLayer from "@/RenderLayer";
+import RenderLayer from "@/customRendering/RenderLayer";
 
 const styles = require('./MapComponent.css') as any
 
@@ -15,7 +12,6 @@ export class MapComponent extends React.Component<MapProps> {
 
     private mapContainer: React.RefObject<HTMLDivElement>
     private renderLayer!: RenderLayer
-    private api = new Api("http://localhost:8080")
 
     private mapLayer!: MapLayer
 
@@ -36,23 +32,33 @@ export class MapComponent extends React.Component<MapProps> {
 
         this.setMapSizeAfterTimeout(500)
 
-        const setInfo = await this.api.getInfo()
-
         this.renderLayer = new RenderLayer({
             canvas: this.mapLayer.Overlay,
-            clock: new SimulationClock(setInfo.startTime, setInfo.endTime),
-            api: this.api,
-            startTime: setInfo.startTime,
-            endTime: setInfo.endTime
         })
 
-        const networkResponse = await this.api.getNetwork("car")
-        this.renderLayer.addNetwork(new Network(networkResponse))
+        /*    if(this.props.configState.serverConfigWasPulled) {
 
-        // fetch only the first bucket of agents
-        //   const trajectories = await this.api.getTrajectories(setInfo.startTime, setInfo.startTime + 3599)
-        //   this.renderLayer.updateTrajectories(trajectories)
-        this.renderLayer.startAnimation()
+            }
+
+            const setInfo = await this.api.getInfo()
+
+            this.renderLayer = new RenderLayer({
+                canvas: this.mapLayer.Overlay,
+                clock: new SimulationClock(setInfo.startTime, setInfo.endTime),
+                api: this.api,
+                startTime: setInfo.startTime,
+                endTime: setInfo.endTime
+            })
+
+            const networkResponse = await this.api.getNetwork("car")
+            this.renderLayer.addNetwork(new Network(networkResponse))
+
+            // fetch only the first bucket of agents
+            //   const trajectories = await this.api.getTrajectories(setInfo.startTime, setInfo.startTime + 3599)
+            //   this.renderLayer.updateTrajectories(trajectories)
+            this.renderLayer.startAnimation()
+
+         */
     }
 
     public render() {

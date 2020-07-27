@@ -1,3 +1,5 @@
+import Dispatcher, {Action} from "@/store/Dispatcher";
+
 export interface Link {
 
     from: Coord
@@ -25,6 +27,7 @@ export interface SetInfo {
     bbox: Rect
     startTime: number
     endTime: number
+    modesInNetwork: String[]
 
 }
 
@@ -34,6 +37,30 @@ export interface Rect {
     minY: number
     maxX: number
     maxY: number
+}
+
+export class SetInfoReceivedAction implements Action {
+    constructor(info: SetInfo) {
+        this._info = info
+    }
+
+    private _info: SetInfo
+
+    public get info() {
+        return this._info
+    }
+}
+
+export class LinksReceivedAction implements Action {
+    constructor(data: Link[]) {
+        this._data = data
+    }
+
+    private _data: Link[]
+
+    public get data() {
+        return this._data
+    }
 }
 
 export default class Api {
@@ -52,8 +79,10 @@ export default class Api {
             headers: {'Content-Type': 'application/json'},
         })
 
-        if (result.ok) return await result.json() as SetInfo
-        else throw new Error("Could not fetch Set information.!!!!1!")
+        if (result.ok) {
+            const info = await result.json() as SetInfo
+            Dispatcher.dispatch(new SetInfoReceivedAction(info))
+        } else throw new Error("Could not fetch Set information.!!!!1!")
     }
 
     public async getNetwork(mode: String) {
@@ -64,7 +93,8 @@ export default class Api {
         })
 
         if (result.ok) {
-            return await result.json() as Link[]
+            const links = await result.json() as Link[]
+            Dispatcher.dispatch(new LinksReceivedAction(links))
         } else {
             throw new Error("error while fetching network!")
         }

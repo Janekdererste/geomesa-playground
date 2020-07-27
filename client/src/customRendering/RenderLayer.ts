@@ -1,18 +1,13 @@
 import {OrthographicCamera, Scene, WebGLRenderer} from "three";
 import Rectangle from "@/Rectangle";
-import Network from "@/Network";
-import NetworkLayer from "@/NetworkLayer";
-import TrafficAnimationLayer from "@/TrafficAnimationLayer";
-import {AnimationClock, SimulationClock} from "@/Clock";
-import Api from "@/API";
+import NetworkLayer from "@/customRendering/NetworkLayer";
+import TrafficAnimationLayer from "@/customRendering/TrafficAnimationLayer";
+import {AnimationClock} from "@/customRendering/AnimationClock";
+import {getConfigStore, getNetworkStore} from "@/store/Stores";
 
 export interface RenderLayerProps {
 
     canvas: HTMLCanvasElement,
-    clock: SimulationClock,
-    api: Api,
-    startTime: number,
-    endTime: number
 }
 
 // maybe come up with a better name
@@ -23,7 +18,10 @@ export default class RenderLayer {
     private scene = new Scene()
     private runAnimation: boolean = false;
     private animationLayer: TrafficAnimationLayer;
-    private clock: AnimationClock
+    private networkLayer: NetworkLayer
+    private clock?: AnimationClock
+
+    private configStore = getConfigStore()
 
 
     constructor(props: RenderLayerProps) {
@@ -38,18 +36,17 @@ export default class RenderLayer {
         this.renderer.setSize(props.canvas.clientWidth, props.canvas.clientHeight)
         this.renderer.setPixelRatio(window.devicePixelRatio)
 
-        // slightly inconsistent with how the network layer is added, maybe change at some point
-        this.animationLayer = new TrafficAnimationLayer(props.api, props.startTime, props.endTime)
+        // we assume that the config only changes once for now. If there are more config params which can be
+        // changed by the user this needs to become more elaborate
+        this.configStore.register(() => {
+            this.clock = new AnimationClock(this.configStore.state.startTime, this.configStore.state.endTime)
+        })
+
+        // if we add more and more layers this will not work like this. But think about this later
+        this.networkLayer = new NetworkLayer(getNetworkStore())
+        this.scene.add(this.networkLayer.sceneObject)
+        this.animationLayer = new TrafficAnimationLayer()
         this.scene.add(this.animationLayer.sceneObject)
-
-        this.clock = new AnimationClock(props.clock)
-    }
-
-    addNetwork(network: Network) {
-        const networkLayer = new NetworkLayer(network)
-        // probably we need to keep a reference to the network layer
-        this.scene.add(networkLayer.sceneObject)
-        if (!this.runAnimation) this.renderSingleFrame()
     }
 
     adjustExtent(extent: Rectangle) {
@@ -82,9 +79,12 @@ export default class RenderLayer {
     private renderAnimation() {
         if (this.runAnimation) {
             requestAnimationFrame(() => this.renderAnimation())
-            this.clock.advanceTime()
-            this.animationLayer.updateTime(this.clock.AnimationTime)
             this.renderSingleFrame()
+
+            if (this.clock) {
+                this.clock.advanceTime()
+                this.animationLayer.updateTime(this.clock.AnimationTime)
+            }
         }
     }
 
