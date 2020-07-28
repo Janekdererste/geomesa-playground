@@ -1,26 +1,30 @@
 import {App} from '@/App'
 import ReactDOM from 'react-dom'
 import * as React from 'react'
-import {getClockStore, getConfigStore, getNetworkStore, setStores} from "@/store/Stores";
+import {getConfigStore, getLinkTripStore, getNetworkStore, getPlaybackStore, setStores} from "@/store/Stores";
 import ConfigurationStore from "@/store/ConfigurationStore";
 import NetworkStore from "@/store/NetworkStore";
 import Dispatcher from "@/store/Dispatcher";
 import Api from "@/API";
-import ClockStore from "@/store/ClockStore";
+import PlaybackStore from "@/store/PlaybackStore";
+import LinkTripStore from "@/store/LinkTripStore";
 
 const api = new Api('http://localhost:8080')
 
 // set up state management
+const configStore = new ConfigurationStore()
 setStores({
-    configStore: new ConfigurationStore(),
+    configStore: configStore,
     networkStore: new NetworkStore(api),
-    clockStore: new ClockStore(),
+    playbackStore: new PlaybackStore(),
+    linkTripStore: new LinkTripStore(api, configStore)
 })
 
 // register stores at dispatcher
 Dispatcher.register(getConfigStore())
 Dispatcher.register(getNetworkStore())
-Dispatcher.register(getClockStore())
+Dispatcher.register(getPlaybackStore())
+Dispatcher.register(getLinkTripStore())
 
 api.getInfo()
 

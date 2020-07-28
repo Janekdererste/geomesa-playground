@@ -3,7 +3,7 @@ import Rectangle from "@/Rectangle";
 import NetworkLayer from "@/customRendering/NetworkLayer";
 import TrafficAnimationLayer from "@/customRendering/TrafficAnimationLayer";
 import {AnimationClock} from "@/customRendering/AnimationClock";
-import {getConfigStore, getNetworkStore} from "@/store/Stores";
+import {getConfigStore, getLinkTripStore, getNetworkStore} from "@/store/Stores";
 
 export interface RenderLayerProps {
 
@@ -45,7 +45,7 @@ export default class RenderLayer {
         // if we add more and more layers this will not work like this. But think about this later
         this.networkLayer = new NetworkLayer(getNetworkStore())
         this.scene.add(this.networkLayer.sceneObject)
-        this.animationLayer = new TrafficAnimationLayer()
+        this.animationLayer = new TrafficAnimationLayer(getLinkTripStore())
         this.scene.add(this.animationLayer.sceneObject)
     }
 

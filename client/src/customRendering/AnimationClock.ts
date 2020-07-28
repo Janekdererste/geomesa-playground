@@ -1,13 +1,13 @@
-import {getClockStore} from "@/store/Stores";
+import {getPlaybackStore} from "@/store/Stores";
 import Dispatcher from "@/store/Dispatcher";
-import {AdvancedTimeAction} from "@/store/ClockStore";
+import {AdvanceTimeAction} from "@/store/PlaybackStore";
 
 export class AnimationClock {
 
     private animationTime: number
     private startTime: number
     private endTime: number;
-    private clockStore = getClockStore()
+    private clockStore = getPlaybackStore()
 
     constructor(startTime: number, endTime: number) {
         this.animationTime = startTime
@@ -30,7 +30,7 @@ export class AnimationClock {
 
         const simulationTime = this.clockStore.state.time
         if (Math.floor(this.AnimationTime) > simulationTime) {
-            Dispatcher.dispatch(new AdvancedTimeAction(simulationTime + 1))
+            Dispatcher.dispatch(new AdvanceTimeAction(simulationTime + 1))
         }
     }
 }

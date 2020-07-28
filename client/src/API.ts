@@ -63,6 +63,33 @@ export class LinksReceivedAction implements Action {
     }
 }
 
+export class BucketReceivedAction implements Action {
+
+    constructor(data: LinkTrip[], fromTime: number, toTime: number) {
+        this._data = data
+        this._fromTime = fromTime
+        this._toTime = toTime
+    }
+
+    private _data: LinkTrip[]
+
+    public get data() {
+        return this._data
+    }
+
+    private _fromTime: number
+
+    public get fromTime() {
+        return this._fromTime
+    }
+
+    private _toTime: number
+
+    public get toTime() {
+        return this._toTime
+    }
+}
+
 export default class Api {
 
     private endpoint: string
@@ -108,8 +135,10 @@ export default class Api {
             headers: {'Content-Type': 'application/json'},
         })
 
-        if (result.ok) return await result.json() as LinkTrip[]
-        else throw new Error("Error while fetching trajectories")
+        if (result.ok) {
+            const trips = await result.json() as LinkTrip[]
+            Dispatcher.dispatch(new BucketReceivedAction(trips, fromTime, toTime))
+        } else throw new Error("Error while fetching trajectories")
     }
 }
 

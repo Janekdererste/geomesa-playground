@@ -2,10 +2,12 @@ import React from 'react'
 import MapLayer from "@/customRendering/MapLayer";
 import Rectangle from "@/Rectangle";
 import RenderLayer from "@/customRendering/RenderLayer";
+import {PlaybackState} from "@/store/PlaybackStore";
 
 const styles = require('./MapComponent.css') as any
 
 export interface MapProps {
+    playbackState: PlaybackState
 }
 
 export class MapComponent extends React.Component<MapProps> {
@@ -35,30 +37,12 @@ export class MapComponent extends React.Component<MapProps> {
         this.renderLayer = new RenderLayer({
             canvas: this.mapLayer.Overlay,
         })
+    }
 
-        /*    if(this.props.configState.serverConfigWasPulled) {
+    public componentDidUpdate(prevProps: Readonly<MapProps>, prevState: Readonly<{}>, snapshot?: any) {
 
-            }
-
-            const setInfo = await this.api.getInfo()
-
-            this.renderLayer = new RenderLayer({
-                canvas: this.mapLayer.Overlay,
-                clock: new SimulationClock(setInfo.startTime, setInfo.endTime),
-                api: this.api,
-                startTime: setInfo.startTime,
-                endTime: setInfo.endTime
-            })
-
-            const networkResponse = await this.api.getNetwork("car")
-            this.renderLayer.addNetwork(new Network(networkResponse))
-
-            // fetch only the first bucket of agents
-            //   const trajectories = await this.api.getTrajectories(setInfo.startTime, setInfo.startTime + 3599)
-            //   this.renderLayer.updateTrajectories(trajectories)
-            this.renderLayer.startAnimation()
-
-         */
+        if (this.props.playbackState.isPlaying) this.renderLayer.startAnimation()
+        else this.renderLayer.stopAnimation()
     }
 
     public render() {

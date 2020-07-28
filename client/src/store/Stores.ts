@@ -1,24 +1,29 @@
 import ConfigurationStore from "@/store/ConfigurationStore";
 import NetworkStore from "@/store/NetworkStore";
-import ClockStore from "@/store/ClockStore";
+import PlaybackStore from "@/store/PlaybackStore";
+import LinkTripStore from "@/store/LinkTripStore";
 
 let configStore: ConfigurationStore
 let networkStore: NetworkStore
-let clockStore: ClockStore
+let playbackStore: PlaybackStore
+let linkTripStore: LinkTripStore
 
 interface StoresInput {
     configStore: ConfigurationStore,
     networkStore: NetworkStore,
-    clockStore: ClockStore
+    playbackStore: PlaybackStore,
+    linkTripStore: LinkTripStore
 }
 
 export const setStores = function (stores: StoresInput) {
 
     configStore = stores.configStore
     networkStore = stores.networkStore
-    clockStore = stores.clockStore
+    playbackStore = stores.playbackStore
+    linkTripStore = stores.linkTripStore
 }
 
 export const getConfigStore = () => configStore
 export const getNetworkStore = () => networkStore
-export const getClockStore = () => clockStore
+export const getPlaybackStore = () => playbackStore
+export const getLinkTripStore = () => linkTripStore
