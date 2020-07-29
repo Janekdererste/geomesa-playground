@@ -23,7 +23,6 @@ export default class RenderLayer {
 
     private configStore = getConfigStore()
 
-
     constructor(props: RenderLayerProps) {
 
         this.canvas = props.canvas
@@ -39,7 +38,7 @@ export default class RenderLayer {
         // we assume that the config only changes once for now. If there are more config params which can be
         // changed by the user this needs to become more elaborate
         this.configStore.register(() => {
-            this.clock = new AnimationClock(this.configStore.state.startTime, this.configStore.state.endTime)
+            this.clock = new AnimationClock(this.configStore.state.startTime, this.configStore.state.endTime, this.configStore.state.startTime)
         })
 
         // if we add more and more layers this will not work like this. But think about this later
@@ -47,6 +46,10 @@ export default class RenderLayer {
         this.scene.add(this.networkLayer.sceneObject)
         this.animationLayer = new TrafficAnimationLayer(getLinkTripStore())
         this.scene.add(this.animationLayer.sceneObject)
+    }
+
+    get animationTime() {
+        return (this.clock) ? this.clock.animationTime : 0
     }
 
     adjustExtent(extent: Rectangle) {
@@ -61,6 +64,15 @@ export default class RenderLayer {
         this.renderer.setSize(extent[0], extent[1])
 
         // all the other stuff should be handled by adjust camera
+    }
+
+    adjustAnimationTime(time: number) {
+        if (this.clock) {
+            this.clock.animationTime = time
+            if (!this.runAnimation)
+                this.animationLayer.updateTime(this.clock.animationTime)
+            this.renderSingleFrame()
+        }
     }
 
     startAnimation() {

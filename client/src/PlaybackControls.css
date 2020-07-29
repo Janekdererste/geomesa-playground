@@ -1,0 +1,12 @@
+.wrapper {
+    display: grid;
+    grid-template-columns: 5rem auto;
+}
+
+.main-button {
+    margin: 0 1rem;
+}
+
+.slider {
+    margin: 0 1rem;
+}

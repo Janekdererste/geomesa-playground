@@ -43,6 +43,10 @@ export class MapComponent extends React.Component<MapProps> {
 
         if (this.props.playbackState.isPlaying) this.renderLayer.startAnimation()
         else this.renderLayer.stopAnimation()
+
+        if (Math.floor(this.renderLayer.animationTime) !== this.props.playbackState.time) {
+            this.renderLayer.adjustAnimationTime(this.props.playbackState.time)
+        }
     }
 
     public render() {
