@@ -4,19 +4,22 @@ import {AdvanceTimeAction} from "@/store/PlaybackStore";
 
 export class AnimationClock {
 
-    private animationTime: number
+    constructor(startTime: number, endTime: number) {
+
+        // animation time is in ms
+        this._animationTime = startTime * 1000
+        this.startTime = startTime * 1000
+        this.endTime = endTime * 1000
+    }
+
     private startTime: number
     private endTime: number;
     private clockStore = getPlaybackStore()
 
-    constructor(startTime: number, endTime: number) {
-        this.animationTime = startTime
-        this.startTime = startTime
-        this.endTime = endTime
-    }
+    private _animationTime: number
 
-    get AnimationTime() {
-        return this.animationTime / 1000
+    get animationTime() {
+        return this._animationTime / 1000
     }
 
     /**
@@ -24,13 +27,15 @@ export class AnimationClock {
      */
     public advanceTime() {
 
-        this.animationTime = 16.7 * this.clockStore.state.playbackSpeed
+        // increment time by 16.7ms * playbackSpeed factor. This assumes 60fps
+        this._animationTime = this._animationTime + 16.7 * this.clockStore.state.playbackSpeed
 
-        if (this.animationTime > this.endTime) this.animationTime = this.startTime
+        if (this._animationTime > this.endTime) this._animationTime = this.startTime
 
         const simulationTime = this.clockStore.state.time
-        if (Math.floor(this.AnimationTime) > simulationTime) {
-            Dispatcher.dispatch(new AdvanceTimeAction(simulationTime + 1))
+        const roundedAnimationTime = Math.floor(this.animationTime)
+        if (roundedAnimationTime > simulationTime) {
+            Dispatcher.dispatch(new AdvanceTimeAction(roundedAnimationTime))
         }
     }
 }

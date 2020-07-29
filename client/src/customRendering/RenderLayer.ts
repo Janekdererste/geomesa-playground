@@ -83,7 +83,7 @@ export default class RenderLayer {
 
             if (this.clock) {
                 this.clock.advanceTime()
-                this.animationLayer.updateTime(this.clock.AnimationTime)
+                this.animationLayer.updateTime(this.clock.animationTime)
             }
         }
     }
