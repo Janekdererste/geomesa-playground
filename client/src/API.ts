@@ -112,8 +112,10 @@ export default class Api {
         } else throw new Error("Could not fetch Set information.!!!!1!")
     }
 
-    public async getNetwork(mode: String) {
-        const result = await fetch(this.endpoint + "/network?modes=" + mode, {
+    public async getNetwork(modes: String[]) {
+        const modesparam = modes.join('&modes=')
+        console.info(modesparam)
+        const result = await fetch(this.endpoint + "/network?modes=" + modesparam, {
             mode: 'cors',
             method: 'GET',
             headers: {'Content-Type': 'application/json'},

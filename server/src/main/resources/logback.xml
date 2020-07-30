@@ -8,4 +8,7 @@
     <root level="info">
         <appender-ref ref="stdout"/>
     </root>
+    <logger name="org.apache.parquet.hadoop" level="WARN">
+        <appender-ref ref="stdout"/>
+    </logger>
 </configuration>

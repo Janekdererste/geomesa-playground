@@ -7,6 +7,7 @@ import org.matsim.contribs.analysis.store.MatsimDataStore;
 import org.matsim.testcases.MatsimTestUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,7 +49,7 @@ public class NetworkEndpointTest {
 
         var endpoint = new NetworkEndpoint(store);
 
-        var result = endpoint.getTrajectoryAsJson("car");
+        var result = endpoint.getTrajectoryAsJson(List.of("car"));
 
         assertEquals(1, result.size());
         var link = result.iterator().next();

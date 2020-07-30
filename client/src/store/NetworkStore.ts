@@ -27,9 +27,10 @@ export default class NetworkStore extends Store<NetworkState> {
         if (action instanceof LinksReceivedAction) {
             return Object.assign({network: new Network(action.data)})
         } else if (action instanceof SetInfoReceivedAction) {
-            // hard code car network for now and do something more elaborated based on the set info later
-            // also consider loading something other than the whole network
-            this.api.getNetwork('car')
+            // take all mode combination which are not pt. This should be configurable in the future
+            const modesToLoad = action.info.modesInNetwork
+                .filter(modes => !modes.includes("pt"))
+            this.api.getNetwork(modesToLoad)
         }
         return state;
     }

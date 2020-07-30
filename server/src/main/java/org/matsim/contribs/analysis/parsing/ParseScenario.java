@@ -59,7 +59,7 @@ public class ParseScenario {
                 var geometry = gFactory.createLineString(new Coordinate[]{
                         MGC.coord2Coordinate(link.getFromNode().getCoord()), MGC.coord2Coordinate(link.getToNode().getCoord())
                 });
-                var modesAsString = String.join("", link.getAllowedModes());
+                var modesAsString = String.join(" ", link.getAllowedModes());
 
                 setInfo.getModesInNetwork().add(modesAsString);
 

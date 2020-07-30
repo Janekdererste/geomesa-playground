@@ -39,7 +39,7 @@ export default class PlaybackStore extends Store<PlaybackState> {
             return Object.assign({}, state, {isPlaying: !state.isPlaying})
         } else if (action instanceof SetInfoReceivedAction) {
             return Object.assign({}, state, {
-                startTime: action.info.startTime, endTime: action.info.endTime
+                startTime: action.info.startTime, endTime: action.info.endTime, time: action.info.startTime
             })
         }
         return state;

@@ -9,6 +9,7 @@ import org.matsim.contribs.analysis.api.SimpleCoordinate;
 import org.matsim.contribs.analysis.api.SimpleLink;
 import org.matsim.contribs.analysis.store.LinkSchema;
 import org.matsim.contribs.analysis.store.MatsimDataStore;
+import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.operation.TransformException;
 
@@ -20,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/network")
 @RequiredArgsConstructor
@@ -31,10 +33,15 @@ public class NetworkEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<SimpleLink> getTrajectoryAsJson(@QueryParam("modes") String modes) {
+    public Collection<SimpleLink> getTrajectoryAsJson(@QueryParam("modes") List<String> allowedModes) {
+
+        List<Filter> equalsFilter = allowedModes.stream()
+                .map(modes -> ff.equals(ff.property(LinkSchema.ALLOWED_MODES), ff.literal(modes)))
+                .collect(Collectors.toList());
+
 
         // duh!, don't use 'equal' but 'equals'!!!
-        var filter = ff.equals(ff.property(LinkSchema.ALLOWED_MODES), ff.literal(modes));
+        var filter = ff.or(equalsFilter);
 
         // collect things in a list and then send it.
         // later it would make sense to just stream features as we read them in
