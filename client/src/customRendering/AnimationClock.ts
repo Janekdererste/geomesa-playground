@@ -1,6 +1,6 @@
 import {getPlaybackStore} from "@/store/Stores";
 import Dispatcher from "@/store/Dispatcher";
-import {AdvanceTimeAction} from "@/store/PlaybackStore";
+import {AdvanceTime} from "@/store/PlaybackStore";
 
 export class AnimationClock {
 
@@ -40,7 +40,7 @@ export class AnimationClock {
         const simulationTime = this.playbackStore.state.time
         const roundedAnimationTime = Math.floor(this.animationTime)
         if (roundedAnimationTime !== simulationTime) {
-            Dispatcher.dispatch(new AdvanceTimeAction(roundedAnimationTime))
+            Dispatcher.dispatch(new AdvanceTime(roundedAnimationTime))
         }
     }
 }

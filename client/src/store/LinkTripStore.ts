@@ -1,7 +1,7 @@
 import Api, {BucketReceivedAction, Coord, LinkTrip, SetInfoReceivedAction} from "@/API";
 import Store from "@/store/Store";
 import {Action} from "@/store/Dispatcher";
-import {AdvanceTimeAction} from "@/store/PlaybackStore";
+import {AdvanceTime} from "@/store/PlaybackStore";
 import ConfigurationStore from "@/store/ConfigurationStore";
 
 export interface MovingPoints {
@@ -88,7 +88,7 @@ export default class LinkTripStore extends Store<LinkTripState> {
 
     protected reduce(state: LinkTripState, action: Action): LinkTripState {
 
-        if (action instanceof AdvanceTimeAction) {
+        if (action instanceof AdvanceTime) {
 
             const index = this.getIndex(action.time)
             if (this.state.buckets[index] !== this.state.currentBucket) {

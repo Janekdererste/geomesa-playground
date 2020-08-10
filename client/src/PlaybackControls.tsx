@@ -1,5 +1,5 @@
 import React from 'react'
-import {AdvanceTimeAction, PlaybackState, TogglePlaybackAction} from "@/store/PlaybackStore";
+import {AdvanceTime, ChangePlaybackSpeed, PlaybackState, TogglePlayback} from "@/store/PlaybackStore";
 import Dispatcher from "@/store/Dispatcher"
 
 const styles = require('./PlaybackControls.css')
@@ -10,21 +10,38 @@ export interface PlaybackControlsProps {
 
 export const PlaybackControls = (props: PlaybackControlsProps) => {
 
-    const dispatchValue = (value: string) => {
+    const dispatchTime = (value: string) => {
         const newValue = Number.parseInt(value)
-        Dispatcher.dispatch(new AdvanceTimeAction(newValue))
+        Dispatcher.dispatch(new AdvanceTime(newValue))
 
     }
+
+    const dispatchSpeed = (value: string) => {
+        const newValue = Number.parseInt(value)
+        const multiplyWith = newValue >= 0 ? newValue : newValue * -1
+        Dispatcher.dispatch(new ChangePlaybackSpeed(newValue * multiplyWith))
+    }
+
     return (
         <div className={styles.wrapper}>
             <button className={styles.mainButton}
-                    onClick={() => Dispatcher.dispatch(new TogglePlaybackAction())}>{props.playbackState.isPlaying ? 'Stop' : 'Start'}
+                    onClick={() => Dispatcher.dispatch(new TogglePlayback())}>{props.playbackState.isPlaying ? 'Stop' : 'Start'}
             </button>
-            <input min={props.playbackState.startTime} max={props.playbackState.endTime} step="1"
-                   onInput={e => dispatchValue(e.currentTarget.value)}
-                   onChange={e => dispatchValue(e.currentTarget.value)}
+            <input className={styles.speedControl} type="range"
+                   min="-10" max="10" step="1"
+                   onInput={e => dispatchSpeed(e.currentTarget.value)}
+                   onChange={e => dispatchSpeed(e.currentTarget.value)}
+            />
+
+            <span className={styles.playbackSpeed}>
+                {props.playbackState.playbackSpeed}x
+            </span>
+
+            <input type="range" min={props.playbackState.startTime} max={props.playbackState.endTime} step="1"
+                   onInput={e => dispatchTime(e.currentTarget.value)}
+                   onChange={e => dispatchTime(e.currentTarget.value)}
                    value={props.playbackState.time}
-                   className={styles.slider} type="range"/>
+            />
         </div>
     )
 }
