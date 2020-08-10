@@ -54,8 +54,8 @@ export default class RenderLayer {
 
     adjustExtent(extent: Rectangle) {
         this.adjustCamera(extent)
-        if (!this.runAnimation)
-            this.renderSingleFrame()
+        // always trigger re-render, otherwise render layer lags behind map layer on pan.
+        this.renderSingleFrame()
     }
 
     adjustSize(extent: [number, number]) {
