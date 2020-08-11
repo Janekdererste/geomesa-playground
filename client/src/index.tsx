@@ -1,13 +1,21 @@
 import {App} from '@/App'
 import ReactDOM from 'react-dom'
 import * as React from 'react'
-import {getConfigStore, getLinkTripStore, getNetworkStore, getPlaybackStore, setStores} from "@/store/Stores";
+import {
+    getConfigStore,
+    getLinkTripStore,
+    getNetworkStore,
+    getPlanStore,
+    getPlaybackStore,
+    setStores
+} from "@/store/Stores";
 import ConfigurationStore from "@/store/ConfigurationStore";
 import NetworkStore from "@/store/NetworkStore";
 import Dispatcher from "@/store/Dispatcher";
 import Api from "@/API";
 import PlaybackStore from "@/store/PlaybackStore";
 import LinkTripStore from "@/store/LinkTripStore";
+import PlanStore from "@/store/PlanStore";
 
 const api = new Api('http://localhost:8080')
 
@@ -17,7 +25,8 @@ setStores({
     configStore: configStore,
     networkStore: new NetworkStore(api),
     playbackStore: new PlaybackStore(),
-    linkTripStore: new LinkTripStore(api, configStore)
+    linkTripStore: new LinkTripStore(api, configStore),
+    planStore: new PlanStore(api)
 })
 
 // register stores at dispatcher
@@ -25,6 +34,7 @@ Dispatcher.register(getConfigStore())
 Dispatcher.register(getNetworkStore())
 Dispatcher.register(getPlaybackStore())
 Dispatcher.register(getLinkTripStore())
+Dispatcher.register(getPlanStore())
 
 api.getInfo()
 

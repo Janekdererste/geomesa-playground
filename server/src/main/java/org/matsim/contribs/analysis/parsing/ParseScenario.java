@@ -48,7 +48,7 @@ public class ParseScenario {
         parser.parse();
     }
 
-    private void parse() {
+    public void parse() {
 
         var network = loadNetworkAndTransform(networkFile, sourceCRS);
 
@@ -99,6 +99,9 @@ public class ParseScenario {
             manager.initProcessing();
             new MatsimEventsReader(manager).readFile(eventsFile);
             manager.finishProcessing();
+
+            // the activity handler must merge overnight activities
+            activityHandler.writeUnfinishedActivities();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

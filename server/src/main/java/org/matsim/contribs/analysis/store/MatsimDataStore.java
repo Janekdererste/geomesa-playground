@@ -59,8 +59,16 @@ public class MatsimDataStore {
         forEach(ActivitySchema.getTypeName(), filter, action);
     }
 
+    public void forEachActivity(Query query, Consumer<SimpleFeature> action) {
+        forEach(query, action);
+    }
+
     public void forEachLeg(Filter filter, Consumer<SimpleFeature> action) {
         forEach(LegSchema.getTypeName(), filter, action);
+    }
+
+    public void forEachLeg(Query query, Consumer<SimpleFeature> action) {
+        forEach(query, action);
     }
 
     public void forEachLinkTrip(Filter filter, Consumer<SimpleFeature> action) {
@@ -72,7 +80,10 @@ public class MatsimDataStore {
     }
 
     private void forEach(String schema, Filter filter, Consumer<SimpleFeature> action) {
-        var query = new Query(schema, filter);
+        forEach(new Query(schema, filter), action);
+    }
+
+    private void forEach(Query query, Consumer<SimpleFeature> action) {
         try (var reader = dataStore.getFeatureReader(query, Transaction.AUTO_COMMIT)) {
             while (reader.hasNext()) {
                 action.accept(reader.next());

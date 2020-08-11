@@ -1,16 +1,41 @@
 import Dispatcher, {Action} from "@/store/Dispatcher";
 
-export interface Link {
+export interface Duration {
 
+    startTime: number
+    endTime: number
+}
+
+export interface Line {
     from: Coord
     to: Coord
-    linkId: string
 }
 
 export interface Coord {
 
     x: number
     y: number
+}
+
+export interface Rect {
+
+    minX: number
+    minY: number
+    maxX: number
+    maxY: number
+}
+
+export interface Leg extends Duration, Line {
+    type: string
+    mode: string
+}
+
+export interface Activity extends Duration {
+
+    coordinate: Coord
+    type: string
+    linkId: string
+    facilityId?: string
 }
 
 export interface LinkTrip {
@@ -22,21 +47,22 @@ export interface LinkTrip {
     mode: String
 }
 
+export interface Plan {
+
+    elements: (Activity | Leg) []
+}
+
+export interface Link extends Line {
+
+    linkId: string
+}
+
 export interface SetInfo {
 
     bbox: Rect
     startTime: number
     endTime: number
     modesInNetwork: String[]
-
-}
-
-export interface Rect {
-
-    minX: number
-    minY: number
-    maxX: number
-    maxY: number
 }
 
 export class SetInfoReceivedAction implements Action {
@@ -87,6 +113,19 @@ export class BucketReceivedAction implements Action {
 
     public get toTime() {
         return this._toTime
+    }
+}
+
+export class PlanReceived implements Action {
+
+    constructor(plan: Plan) {
+        this._plan = plan
+    }
+
+    private _plan: Plan
+
+    public get plan() {
+        return this._plan
     }
 }
 
@@ -141,6 +180,20 @@ export default class Api {
             const trips = await result.json() as LinkTrip[]
             Dispatcher.dispatch(new BucketReceivedAction(trips, fromTime, toTime))
         } else throw new Error("Error while fetching trajectories")
+    }
+
+    public async getPlan(personId: string) {
+
+        const result = await fetch(this.endpoint + "/plan/" + personId, {
+            mode: 'cors',
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+        })
+
+        if (result.ok) {
+            const plan = await result.json() as Plan
+            Dispatcher.dispatch(new PlanReceived(plan))
+        } else throw new Error("Error while fetching plan")
     }
 }
 

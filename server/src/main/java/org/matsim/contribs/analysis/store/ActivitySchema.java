@@ -21,7 +21,7 @@ public class ActivitySchema implements IntervalSchema {
         return schema;
     }
 
-    static String getTypeName() {
+    public static String getTypeName() {
         return schema.getTypeName();
     }
 

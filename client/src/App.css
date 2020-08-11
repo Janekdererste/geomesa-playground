@@ -4,6 +4,9 @@
     padding: 0;
     margin: 0;
     position: relative;
+    display: grid;
+    grid-template-rows: min-content auto min-content;
+    grid-template-columns: 20rem auto;
 }
 
 .map {
@@ -13,10 +16,9 @@
 }
 
 .clock {
-    position: absolute;
-    top: 0;
-    left: 0;
     margin: 0.5rem;
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
 
     z-index: 500;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
@@ -24,13 +26,20 @@
     overflow: hidden;
 }
 
-.controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+.sidebar {
+    grid-column: 1 / span 1;
+    grid-row: 2 / span 1;
+    z-index: 500;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    background-color: white;
+    overflow: hidden;
     margin: 0.5rem;
+}
 
+.controls {
+    margin: 0.5rem;
+    grid-column: 1/span 2;
+    grid-row: 3 / span 1;
     z-index: 500;
     /*box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);*/
     background-color: transparent;

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.matsim.contribs.analysis.endpoints.InfoEndpoint;
 import org.matsim.contribs.analysis.endpoints.NetworkEndpoint;
+import org.matsim.contribs.analysis.endpoints.PlanEndpoint;
 import org.matsim.contribs.analysis.endpoints.TrajectoryEndpoint;
 import org.matsim.contribs.analysis.store.MatsimDataStore;
 
@@ -37,6 +38,7 @@ public class App extends Application<AppConfiguration> {
         log.info("Registering resources");
         environment.jersey().register(new NetworkEndpoint(store));
         environment.jersey().register(new TrajectoryEndpoint(store));
+        environment.jersey().register(new PlanEndpoint(store));
         environment.jersey().register(new InfoEndpoint(Paths.get(appConfiguration.getStoreRoot()).resolve("SetInfo.json")));
 
         registerCORSFilter(environment.servlets());
