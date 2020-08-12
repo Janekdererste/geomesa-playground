@@ -17,6 +17,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.BasicEventHandler;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
@@ -36,7 +37,7 @@ public class ParseScenario {
     private final SetInformation setInfo = new SetInformation();
     private final String networkFile;
     private final String eventsFile;
-    private final String sourceCRS;
+    private final CoordinateTransformation transformation;
 
     public static void main(String[] arguments) throws IOException {
 
@@ -44,13 +45,15 @@ public class ParseScenario {
         JCommander.newBuilder().addObject(args).build().parse(arguments);
 
         var store = new MatsimDataStore(args.storeRoot);
-        var parser = new ParseScenario(store, args.networkFile, args.eventsFile, args.sourceCRS);
+        log.info("Transforming from " + args.sourceCRS + " to " + WGS_84);
+        var transformation = TransformationFactory.getCoordinateTransformation(args.sourceCRS, WGS_84);
+        var parser = new ParseScenario(store, args.networkFile, args.eventsFile, transformation);
         parser.parse();
     }
 
     public void parse() {
 
-        var network = loadNetworkAndTransform(networkFile, sourceCRS);
+        var network = loadNetworkAndTransform(networkFile);
 
         try (var linkWriter = store.getLinkWriter()) {
 
@@ -84,7 +87,7 @@ public class ParseScenario {
         try (var legWriter = store.getLegWriter(); var linkTripWriter = store.getLinkTripWriter(); var activityWriter = store.getActivityWriter()) {
 
             var movementHandler = new MovementHandler(linkTripWriter, legWriter, network);
-            var activityHandler = new ActivityHandler(activityWriter, network, null);
+            var activityHandler = new ActivityHandler(activityWriter, network, null, transformation);
             var timeHandler = new BasicEventHandler() {
 
                 @Override
@@ -113,12 +116,10 @@ public class ParseScenario {
         }
     }
 
-    private Network loadNetworkAndTransform(String networkPath, String sourceCRS) {
+    private Network loadNetworkAndTransform(String networkPath) {
 
-        var transformation = TransformationFactory.getCoordinateTransformation(sourceCRS, WGS_84);
         var network = NetworkUtils.readNetwork(networkPath);
 
-        log.info("Transforming network from " + sourceCRS + " to " + WGS_84);
         network.getNodes().values().parallelStream().forEach(node -> {
 
             var transformedCoord = transformation.transform(node.getCoord());

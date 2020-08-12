@@ -60,8 +60,8 @@ public class TrajectoryEndpointTest {
 
         assertEquals(1, result.size());
         var linkTrip = result.iterator().next();
-        assertEquals(601, linkTrip.getFromTime());
+        assertEquals(601, linkTrip.getStartTime());
         assertEquals("car", linkTrip.getMode());
-        assertEquals(1200, linkTrip.getToTime());
+        assertEquals(1200, linkTrip.getEndTime());
     }
 }

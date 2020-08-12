@@ -10,6 +10,7 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contribs.analysis.store.ActivitySchema;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.facilities.ActivityFacilities;
 import org.opengis.feature.simple.SimpleFeature;
@@ -26,11 +27,11 @@ public class ActivityHandler implements ActivityStartEventHandler, ActivityEndEv
 
     private final FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
     private final Map<String, ActivityStartEvent> startedActivities = new HashMap<>();
-    private final Map<String, ActivityEndEvent> wrapAroundActivities = new HashMap<>();
 
     // for now, we'll put in null for facilities. I guess this could be solved more elegantly
     private final Network network;
     private final ActivityFacilities facilities;
+    private final CoordinateTransformation transformation;
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
@@ -119,9 +120,15 @@ public class ActivityHandler implements ActivityStartEventHandler, ActivityEndEv
 
         if (event instanceof ActivityStartEvent) {
             var start = (ActivityStartEvent) event;
-            if (start.getCoord() != null) return start.getCoord();
+            if (start.getCoord() != null) {
+                return transformation.transform(start.getCoord());
+            }
         }
 
+        /*
+         * The network and facility coords should've been transformed before. The only coords we can't transform beforehand are
+         * the coords in the activities themselves
+         */
         if (event instanceof HasFacilityId) {
             var hasFacility = (HasFacilityId) event;
             if (hasFacility.getFacilityId() != null && facilities != null && facilities.getFacilities().containsKey(hasFacility.getFacilityId()))

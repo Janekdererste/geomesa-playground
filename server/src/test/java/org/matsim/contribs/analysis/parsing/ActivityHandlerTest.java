@@ -11,6 +11,7 @@ import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.contribs.analysis.store.ActivitySchema;
 import org.matsim.contribs.analysis.store.MatsimDataStore;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.testcases.MatsimTestUtils;
 
@@ -35,7 +36,7 @@ public class ActivityHandlerTest {
 
         try (var writer = store.getActivityWriter()) {
 
-            var handler = new ActivityHandler(writer, null, null);
+            var handler = new ActivityHandler(writer, null, null, TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326"));
             var startEvent = new ActivityStartEvent(
                     1,
                     Id.createPersonId("1"),

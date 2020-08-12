@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.geotools.data.Query;
 import org.geotools.filter.FilterFactoryImpl;
+import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.matsim.contribs.analysis.Transformation;
 import org.matsim.contribs.analysis.api.ApiPlan;
 import org.matsim.contribs.analysis.api.SimpleCoordinate;
 import org.matsim.contribs.analysis.store.ActivitySchema;
@@ -14,13 +17,17 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.sort.SortBy;
 import org.opengis.filter.sort.SortOrder;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 
 @Path("/plan")
 @RequiredArgsConstructor
@@ -34,7 +41,7 @@ public class PlanEndpoint {
     @GET
     @Path("{personId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ApiPlan getPlan(@PathParam("personId") String personId) {
+    public ApiPlan getPlan(@PathParam("personId") String personId) throws TransformException {
 
         var personFilter = ff.equals(ff.property(ActivitySchema.PERSON_ID), ff.literal(personId));
         var sortBy = ff.sort(ActivitySchema.END_TIME, SortOrder.ASCENDING);
@@ -49,8 +56,6 @@ public class PlanEndpoint {
         legQuery.setSortBy(new SortBy[]{sortBy});
         Queue<SimpleFeature> legs = new LinkedList<>();
         store.forEachLeg(legQuery, legs::add);
-
-        List<SimpleFeature> result = new ArrayList<>();
 
         var plan = new ApiPlan();
 
@@ -73,22 +78,21 @@ public class PlanEndpoint {
     /**
      * This will most probably move somewhere central, when it is used in multiple places
      */
-    private ApiPlan.ApiActivity convertToActivity(SimpleFeature feature) {
-
+    private ApiPlan.ApiActivity convertToActivity(SimpleFeature feature) throws TransformException {
 
         return new ApiPlan.ApiActivity(
                 ((Date) feature.getAttribute(ActivitySchema.START_TIME)).getTime() / 1000.0,
                 ((Date) feature.getAttribute(ActivitySchema.END_TIME)).getTime() / 1000.0,
-                new SimpleCoordinate(((Geometry) feature.getDefaultGeometry()).getCoordinate()),
+                new SimpleCoordinate(extractAndTransformCoordinates(feature)[0]),
                 (String) feature.getAttribute(ActivitySchema.TYPE),
                 (String) feature.getAttribute(ActivitySchema.FACILITY_ID),
                 (String) feature.getAttribute(ActivitySchema.LINK_ID)
         );
     }
 
-    private ApiPlan.ApiLeg convertToLeg(SimpleFeature feature) {
+    private ApiPlan.ApiLeg convertToLeg(SimpleFeature feature) throws TransformException {
 
-        var coords = ((Geometry) feature.getDefaultGeometry()).getCoordinates();
+        var coords = extractAndTransformCoordinates(feature);
 
         return new ApiPlan.ApiLeg(
                 ((Date) feature.getAttribute(LegSchema.START_TIME)).getTime() / 1000.0,
@@ -98,5 +102,11 @@ public class PlanEndpoint {
                 (String) feature.getAttribute(LegSchema.MODE),
                 (String) feature.getAttribute(LegSchema.TYPE)
         );
+    }
+
+    private Coordinate[] extractAndTransformCoordinates(SimpleFeature feature) throws TransformException {
+        var geometry = (Geometry) feature.getDefaultGeometry();
+        var mercartorGeometry = JTS.transform(geometry, Transformation.TRANSFORM);
+        return mercartorGeometry.getCoordinates();
     }
 }

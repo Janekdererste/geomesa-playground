@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class SimpleLink {
 
-    private final SimpleCoordinate from;
-    private final SimpleCoordinate to;
+    private final SimpleCoordinate fromCoordinate;
+    private final SimpleCoordinate toCoordinate;
     private final String id;
 }
