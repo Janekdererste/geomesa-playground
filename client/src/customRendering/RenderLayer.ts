@@ -3,7 +3,8 @@ import Rectangle from "@/Rectangle";
 import NetworkLayer from "@/customRendering/NetworkLayer";
 import TrafficAnimationLayer from "@/customRendering/TrafficAnimationLayer";
 import {AnimationClock} from "@/customRendering/AnimationClock";
-import {getConfigStore, getLinkTripStore, getNetworkStore} from "@/store/Stores";
+import {getConfigStore, getLinkTripStore, getNetworkStore, getPlanStore} from "@/store/Stores";
+import PlanLayer from "@/customRendering/PlanLayer";
 
 export interface RenderLayerProps {
 
@@ -19,6 +20,7 @@ export default class RenderLayer {
     private runAnimation: boolean = false;
     private animationLayer: TrafficAnimationLayer;
     private networkLayer: NetworkLayer
+    private planLayer: PlanLayer;
     private clock?: AnimationClock
 
     private configStore = getConfigStore()
@@ -46,6 +48,8 @@ export default class RenderLayer {
         this.scene.add(this.networkLayer.sceneObject)
         this.animationLayer = new TrafficAnimationLayer(getLinkTripStore())
         this.scene.add(this.animationLayer.sceneObject)
+        this.planLayer = new PlanLayer(getPlanStore())
+        this.scene.add(this.planLayer.sceneObject)
     }
 
     get animationTime() {

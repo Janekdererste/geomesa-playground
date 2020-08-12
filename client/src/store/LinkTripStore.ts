@@ -45,20 +45,20 @@ export class VehicleBucket {
 
         const fromCoords: number[] = []
         const toCoords: number[] = []
-        const fromTimes: number[] = []
-        const toTimes: number[] = []
+        const startTimes: number[] = []
+        const endTimes: number[] = []
 
         linkTrips.forEach(linkTrip => {
 
-            VehicleBucket.pushCoord(fromCoords, linkTrip.from)
-            VehicleBucket.pushCoord(toCoords, linkTrip.to)
-            fromTimes.push(linkTrip.fromTime)
-            toTimes.push(linkTrip.toTime)
+            VehicleBucket.pushCoord(fromCoords, linkTrip.fromCoordinate)
+            VehicleBucket.pushCoord(toCoords, linkTrip.toCoordinate)
+            startTimes.push(linkTrip.startTime)
+            endTimes.push(linkTrip.endTime)
         })
 
         return {
-            fromTimes: new Float32Array(fromTimes),
-            toTimes: new Float32Array(toTimes),
+            fromTimes: new Float32Array(startTimes),
+            toTimes: new Float32Array(endTimes),
             positions: new Float32Array(fromCoords),
             toPositions: new Float32Array(toCoords),
         }

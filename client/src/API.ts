@@ -7,8 +7,8 @@ export interface Duration {
 }
 
 export interface Line {
-    from: Coord
-    to: Coord
+    fromCoordinate: Coord
+    toCoordinate: Coord
 }
 
 export interface Coord {
@@ -38,12 +38,7 @@ export interface Activity extends Duration {
     facilityId?: string
 }
 
-export interface LinkTrip {
-
-    from: Coord
-    to: Coord
-    fromTime: number
-    toTime: number
+export interface LinkTrip extends Line, Duration {
     mode: String
 }
 

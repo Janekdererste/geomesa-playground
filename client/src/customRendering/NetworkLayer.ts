@@ -17,8 +17,8 @@ export default class NetworkLayer extends SceneLayer {
         const attribute = new BufferAttribute(new Float32Array([]), 3)
         const geometry = new BufferGeometry()
         geometry.setAttribute('position', attribute)
-        const material = new LineBasicMaterial({color: 0x0000ff});
-        const mesh = new LineSegments(geometry, material);
+        const material = new LineBasicMaterial({color: 0x0000ff})
+        const mesh = new LineSegments(geometry, material)
         mesh.name = NETWORK_LAYER
         mesh.position.z = -11
         mesh.frustumCulled = false
