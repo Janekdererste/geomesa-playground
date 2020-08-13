@@ -9,6 +9,7 @@ export interface MovingPoints {
     toPositions: Float32Array
     fromTimes: Float32Array
     toTimes: Float32Array
+    ids: string[]
     // colors: Float32Array do this later
 }
 
@@ -47,6 +48,7 @@ export class VehicleBucket {
         const toCoords: number[] = []
         const startTimes: number[] = []
         const endTimes: number[] = []
+        const ids: string[] = []
 
         linkTrips.forEach(linkTrip => {
 
@@ -54,6 +56,7 @@ export class VehicleBucket {
             VehicleBucket.pushCoord(toCoords, linkTrip.toCoordinate)
             startTimes.push(linkTrip.startTime)
             endTimes.push(linkTrip.endTime)
+            ids.push(linkTrip.personId)
         })
 
         return {
@@ -61,6 +64,7 @@ export class VehicleBucket {
             toTimes: new Float32Array(endTimes),
             positions: new Float32Array(fromCoords),
             toPositions: new Float32Array(toCoords),
+            ids: ids
         }
     }
 }

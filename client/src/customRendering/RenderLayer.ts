@@ -92,6 +92,10 @@ export default class RenderLayer {
         }
     }
 
+    intersect(coordinate: [number, number]) {
+        this.animationLayer.intersect(coordinate)
+    }
+
     private renderAnimation() {
         if (this.runAnimation) {
             requestAnimationFrame(() => this.renderAnimation())

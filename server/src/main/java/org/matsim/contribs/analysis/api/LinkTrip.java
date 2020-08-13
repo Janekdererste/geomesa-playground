@@ -12,4 +12,5 @@ public class LinkTrip {
     private final long startTime;
     private final long endTime;
     private final String mode;
+    private final String personId;
 }

@@ -29,13 +29,14 @@ export class MapComponent extends React.Component<MapProps> {
         this.mapLayer = new MapLayer({
             container: this.mapContainer.current,
             onSizeChanged: extent => this.onSizeChanged(extent),
-            onFinishRender: extent => this.onFinishRender(extent)
+            onFinishRender: extent => this.onFinishRender(extent),
+            onClick: coordinate => this.onClick(coordinate)
         })
 
         this.setMapSizeAfterTimeout(500)
 
         this.renderLayer = new RenderLayer({
-            canvas: this.mapLayer.Overlay,
+            canvas: this.mapLayer.overlay,
         })
     }
 
@@ -74,5 +75,9 @@ export class MapComponent extends React.Component<MapProps> {
     private onFinishRender(extent: Rectangle) {
         if (this.renderLayer)
             this.renderLayer.adjustExtent(extent)
+    }
+
+    private onClick(coordinate: [number, number]) {
+        if (this.renderLayer) this.renderLayer.intersect(coordinate)
     }
 }

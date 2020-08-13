@@ -39,7 +39,8 @@ export interface Activity extends Duration {
 }
 
 export interface LinkTrip extends Line, Duration {
-    mode: String
+    mode: string
+    personId: string
 }
 
 export interface Plan {

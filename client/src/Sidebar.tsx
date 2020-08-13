@@ -1,6 +1,5 @@
 import React from 'react'
-import {PlanState, SelectPerson} from "@/store/PlanStore";
-import Dispatcher from "@/store/Dispatcher";
+import {PlanState} from "@/store/PlanStore";
 import {Activity, Leg} from "@/API";
 
 export interface SidebarProps {
@@ -25,8 +24,8 @@ const getElementLabel = (element: Activity | Leg) => {
 }
 
 export const Sidebar = (props: SidebarProps) => (<div>
-    <button onClick={() => Dispatcher.dispatch(new SelectPerson("1"))}>Load Plan</button>
-    <ul>
+
+<ul>
         {props.planState.selectedPlan?.elements.map(element => {
             return (<li>{getElementLabel(element)}</li>)
         })}

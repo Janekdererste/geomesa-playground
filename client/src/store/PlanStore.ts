@@ -20,6 +20,10 @@ export class SelectPerson implements Action {
     }
 }
 
+export class UnselectPerson implements Action {
+}
+
+
 export default class PlanStore extends Store<PlanState> {
 
     private api: Api
@@ -40,10 +44,15 @@ export default class PlanStore extends Store<PlanState> {
 
         if (action instanceof PlanReceived) {
             return Object.assign({}, state, {selectedPlan: action.plan, isFetching: false})
-        }
-        if (action instanceof SelectPerson) {
+        } else if (action instanceof SelectPerson) {
+            // this could lead to race conditions if a previously selected agent is still fetched and is received after
+            // another person was selected or unselect was triggered. Probably a placeholder loading object, which holds
+            // the selected id is the way to go here
             this.api.getPlan(action.personId)
             return Object.assign({}, state, {isFetching: true})
+        } else if (action instanceof UnselectPerson) {
+
+            return Object.assign({}, state, {selectedPLan: undefined})
         }
         return state
     }

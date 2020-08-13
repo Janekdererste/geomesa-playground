@@ -54,12 +54,14 @@ public class TrajectoryEndpoint {
                 var startTime = (Date) feature.getAttribute(LinkTripSchema.START_TIME);
                 var endTime = (Date) feature.getAttribute(LinkTripSchema.END_TIME);
                 var mode = (String) feature.getAttribute(LinkTripSchema.MODE);
+                var personId = (String) feature.getAttribute(LinkTripSchema.PERSON_ID);
 
                 var wireFormat = new LinkTrip(
                         new SimpleCoordinate(coordinates[0]),
                         new SimpleCoordinate(coordinates[1]),
                         startTime.getTime() / 1000, endTime.getTime() / 1000,
-                        mode
+                        mode,
+                        personId
                 );
 
                 result.add(wireFormat);

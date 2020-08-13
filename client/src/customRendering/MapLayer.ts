@@ -1,7 +1,7 @@
 import Map from 'ol/Map'
 import TileLayer from "ol/layer/Tile";
 import {OSM} from "ol/source";
-import {View} from "ol";
+import {MapBrowserEvent, View} from "ol";
 import {ObjectEvent} from "ol/Object";
 import Rectangle from "@/Rectangle";
 
@@ -11,13 +11,12 @@ export interface MapLayerProps {
     container: HTMLDivElement,
     onSizeChanged: (extent: [number, number]) => void,
     onFinishRender: (extend: Rectangle) => void
+    onClick: (coordinate: [number, number]) => void
 }
 
 export default class MapLayer {
 
     private map: Map;
-    private overlay: HTMLCanvasElement
-
     constructor(props: MapLayerProps) {
 
         this.map = new Map({
@@ -27,10 +26,10 @@ export default class MapLayer {
         })
 
         // add a second canvas for the ThreeJS Overlay
-        this.overlay = document.createElement('canvas')
-        this.overlay.className = styles.overlay
-        this.overlay.id = 'overlay-canvas '
-        this.map.getViewport().appendChild(this.overlay)
+        this._overlay = document.createElement('canvas')
+        this._overlay.className = styles.overlay
+        this._overlay.id = 'overlay-canvas '
+        this.map.getViewport().appendChild(this._overlay)
 
         this.map.on('change:size', e => {
             const newValue = (e as ObjectEvent).target.get(e.key)
@@ -41,10 +40,16 @@ export default class MapLayer {
             const extent = this.map.getView().calculateExtent();
             props.onFinishRender(Rectangle.createFromExtend(extent))
         })
+
+        this.map.on('click', (e: MapBrowserEvent) => {
+            props.onClick([e.coordinate[0], e.coordinate[1]])
+        })
     }
 
-    get Overlay() {
-        return this.overlay
+    private _overlay: HTMLCanvasElement
+
+    get overlay() {
+        return this._overlay
     }
 
     updateSize() {
