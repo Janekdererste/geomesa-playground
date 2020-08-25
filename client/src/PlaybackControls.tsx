@@ -27,15 +27,18 @@ export const PlaybackControls = (props: PlaybackControlsProps) => {
             <button className={styles.mainButton}
                     onClick={() => Dispatcher.dispatch(new TogglePlayback())}>{props.playbackState.isPlaying ? 'Stop' : 'Start'}
             </button>
-            <input className={styles.speedControl} type="range"
-                   min="-10" max="10" step="1"
-                   onInput={e => dispatchSpeed(e.currentTarget.value)}
-                   onChange={e => dispatchSpeed(e.currentTarget.value)}
-            />
-
-            <span className={styles.playbackSpeed}>
+            <div className={styles.speedControlContainer}>
+                <div  className={styles.speedControl}>
+                    <input type="range"
+                           min="-10" max="10" step="1"
+                           onInput={e => dispatchSpeed(e.currentTarget.value)}
+                           onChange={e => dispatchSpeed(e.currentTarget.value)}
+                    />
+                </div>
+                <span className={styles.playbackSpeed}>
                 {props.playbackState.playbackSpeed}x
             </span>
+            </div>
 
             <input type="range" min={props.playbackState.startTime} max={props.playbackState.endTime} step="1"
                    onInput={e => dispatchTime(e.currentTarget.value)}

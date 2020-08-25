@@ -47,7 +47,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <div className={styles.clock}>
                     <ClockComponent time={this.state.playbackState.time}/>
                 </div>
-                <div className={styles.sidebar}>
+                <div className={this.state.planState.selectedPlan ? styles.sidebar: styles.sidebar + ' ' + styles.sidebarHidden}>
                     <Sidebar planState={this.state.planState}/>
                 </div>
                 <div className={styles.controls}>

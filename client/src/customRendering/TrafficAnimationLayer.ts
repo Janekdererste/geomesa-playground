@@ -95,12 +95,13 @@ export default class TrafficAnimationLayer extends SceneLayer {
                 const fraction = (this.currentTime - startTime) / (endTime - startTime)
                 position.lerpVectors(from, to, fraction)
 
-                // distance squared because the docs say it is more efficient - i guess now sqrt involved
+                // distance squared because the docs say it is more efficient - i guess no sqrt involved
                 const distance = point.distanceToSquared(position)
-                intersections.push({
-                    distance: distance,
-                    index: i
-                })
+
+                // this is some arbitrary distance and should be set to something meaningful ...
+                if (distance < 1000000) {
+                    intersections.push({ distance: distance, index: i })
+                }
             }
         }
 

@@ -114,14 +114,20 @@ export class BucketReceivedAction implements Action {
 
 export class PlanReceived implements Action {
 
-    constructor(plan: Plan) {
+    constructor(personId: string, plan: Plan) {
+        this._id = personId
         this._plan = plan
     }
 
     private _plan: Plan
+    private _id: string
 
     public get plan() {
         return this._plan
+    }
+
+    public get personId() {
+        return this._id
     }
 }
 
@@ -188,7 +194,7 @@ export default class Api {
 
         if (result.ok) {
             const plan = await result.json() as Plan
-            Dispatcher.dispatch(new PlanReceived(plan))
+            Dispatcher.dispatch(new PlanReceived(personId, plan))
         } else throw new Error("Error while fetching plan")
     }
 }

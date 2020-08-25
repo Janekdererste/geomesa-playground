@@ -1,6 +1,6 @@
 import React from 'react'
 import {PlanState} from "@/store/PlanStore";
-import {Activity, Leg} from "@/API";
+import {Activity, Leg, Plan} from "@/API";
 
 export interface SidebarProps {
     planState: PlanState
@@ -25,10 +25,19 @@ const getElementLabel = (element: Activity | Leg) => {
 
 export const Sidebar = (props: SidebarProps) => (<div>
 
-<ul>
-        {props.planState.selectedPlan?.elements.map(element => {
+    <h3>Person: {props.planState.selectedPlan?.personId}</h3>
+
+    {props.planState.selectedPlan?.plan ? <Plan plan={props.planState.selectedPlan.plan} /> : <span>Loading...</span>}
+
+</div>)
+
+interface PlanProps { plan: Plan }
+const Plan = (props: PlanProps) => (
+    <ul>
+        {props.plan.elements.map(element => {
             return (<li>{getElementLabel(element)}</li>)
         })}
     </ul>
-</div>)
+)
+
 

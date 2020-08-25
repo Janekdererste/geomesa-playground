@@ -22,7 +22,7 @@ export default class PlanLayer extends SceneLayer {
 
     constructor(planStore: PlanStore) {
         super(PlanLayer.init());
-        planStore.register(() => this.setPlan(planStore.state.selectedPlan))
+        planStore.register(() => this.setPlan(planStore.state.selectedPlan?.plan))
     }
 
     private static init() {
