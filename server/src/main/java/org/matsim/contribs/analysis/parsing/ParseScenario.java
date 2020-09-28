@@ -37,7 +37,9 @@ public class ParseScenario {
     private final SetInformation setInfo = new SetInformation();
     private final String networkFile;
     private final String eventsFile;
+    private final String setName;
     private final CoordinateTransformation transformation;
+
 
     public static void main(String[] arguments) throws IOException {
 
@@ -47,7 +49,7 @@ public class ParseScenario {
         var store = new MatsimDataStore(args.storeRoot);
         log.info("Transforming from " + args.sourceCRS + " to " + WGS_84);
         var transformation = TransformationFactory.getCoordinateTransformation(args.sourceCRS, WGS_84);
-        var parser = new ParseScenario(store, args.networkFile, args.eventsFile, transformation);
+        var parser = new ParseScenario(store, args.networkFile, args.eventsFile, args.setName, transformation);
         parser.parse();
     }
 
@@ -131,7 +133,7 @@ public class ParseScenario {
     }
 
     private void writeSetInfo() throws IOException {
-        Path infoPath = Paths.get(store.getStoreRoot()).resolve("SetInfo.json");
+        Path infoPath = Paths.get(store.getStoreRoot()).resolve(this.setName + "-set-info.json");
 
         log.info("Writing set info to: " + infoPath);
         var mapper = new ObjectMapper();
@@ -151,5 +153,8 @@ public class ParseScenario {
 
         @Parameter(names = "-crs", required = true)
         private String sourceCRS;
+
+        @Parameter(names = "-sn", required = true)
+        private String setName;
     }
 }

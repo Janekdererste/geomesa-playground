@@ -16,6 +16,7 @@ public class LinkSchema {
     public static final String CAPACITY = "capacity";
     public static final String FREESPEED = "freespeed";
     public static final String LENGTH = "length";
+    public static final String SET_ID = "setId";
 
     private static final SimpleFeatureType schema = createSchema();
 
@@ -41,6 +42,7 @@ public class LinkSchema {
                 .addDouble(CAPACITY).end()
                 .addDouble(FREESPEED).end()
                 .addDouble(LENGTH).end()
+                .addString(SET_ID).withIndex().end()
                 .build("links");
     }
 }

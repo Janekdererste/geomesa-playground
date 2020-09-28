@@ -8,11 +8,13 @@ public interface IntervalSchema {
     String START_TIME = "startTime";
     String END_TIME = "endTime";
     String PERSON_ID = "personId";
+    String SET_ID = "setId";
 
     static SchemaBuilder.AbstractSchemaBuilder<SchemaBuilder.AttributeBuilder, ? extends SchemaBuilder.AbstractUserDataBuilder<?>> createBuilderWithDefaultValues() {
         return SchemaBuilder.builder()
                 .addDate(START_TIME, false).end()
                 .addDate(END_TIME, true).end()
-                .addString(PERSON_ID).end();
+                .addString(PERSON_ID).withIndex().end()
+                .addString(SET_ID).withIndex().end();
     }
 }

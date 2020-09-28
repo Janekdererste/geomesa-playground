@@ -23,7 +23,7 @@ public class PlanEndpointTest {
         var store = new MatsimDataStore(testUtils.getOutputDirectory() + "store");
 
         // parse a simple scenario
-        var parser = new ParseScenario(store, "C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-100-agent\\output_network.xml.gz", "C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-100-agent\\output_events.xml.gz", TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326"));
+        var parser = new ParseScenario(store, "C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-100-agent\\output_network.xml.gz", "C:\\Users\\Janekdererste\\Desktop\\equil-scenario\\output-100-agent\\output_events.xml.gz", "test", TransformationFactory.getCoordinateTransformation("EPSG:3857", "EPSG:4326"));
         parser.parse();
 
         var endpoint = new PlanEndpoint(store);
